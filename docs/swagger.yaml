@@ -1,0 +1,96 @@
+definitions:
+  models.Auth:
+    properties:
+      password:
+        example: "123456"
+        type: string
+      username:
+        example: example@gmail.com
+        type: string
+    type: object
+  models.Customer:
+    properties:
+      firstname:
+        example: Adam
+        type: string
+      registrationDate:
+        example: "2020-09-09T21:21:46+00:00"
+        type: string
+      releaseDate:
+        example: "2020-09-09T22:21:46+00:00"
+        type: string
+      username:
+        example: example@gmail.com
+        type: string
+    type: object
+info:
+  contact: {}
+  license: {}
+paths:
+  /profile:
+    post:
+      consumes:
+      - application/json
+      description: Profile customer the input paylod
+      parameters:
+      - description: Profile customer
+        in: body
+        name: signup
+        required: true
+        schema:
+          $ref: '#/definitions/models.Customer'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Customer'
+      summary: Profile customer
+      tags:
+      - sign
+  /signin:
+    post:
+      consumes:
+      - application/json
+      description: Sign auth client the input paylod
+      parameters:
+      - description: SignIn auth
+        in: body
+        name: signin
+        required: true
+        schema:
+          $ref: '#/definitions/models.Auth'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Auth'
+      summary: Sign auth
+      tags:
+      - sign
+  /signup:
+    post:
+      consumes:
+      - application/json
+      description: Sign Up new customer the input paylod
+      parameters:
+      - description: SignUp customer
+        in: body
+        name: signup
+        required: true
+        schema:
+          $ref: '#/definitions/models.Customer'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Customer'
+      summary: Sign Up new customer
+      tags:
+      - sign
+swagger: "2.0"
