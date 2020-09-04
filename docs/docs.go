@@ -79,7 +79,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.Auth"
+                            "$ref": "#/definitions/models.SignInput"
                         }
                     }
                 ],
@@ -87,7 +87,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.Auth"
+                            "$ref": "#/definitions/models.SignInput"
                         }
                     }
                 }
@@ -129,25 +129,16 @@ var doc = `{
         }
     },
     "definitions": {
-        "models.Auth": {
-            "type": "object",
-            "properties": {
-                "password": {
-                    "type": "string",
-                    "example": "123456"
-                },
-                "username": {
-                    "type": "string",
-                    "example": "example@gmail.com"
-                }
-            }
-        },
         "models.Customer": {
             "type": "object",
             "properties": {
                 "firstname": {
                     "type": "string",
                     "example": "Adam"
+                },
+                "password": {
+                    "type": "string",
+                    "example": "123456"
                 },
                 "registrationDate": {
                     "type": "string",
@@ -156,6 +147,19 @@ var doc = `{
                 "releaseDate": {
                     "type": "string",
                     "example": "2020-09-09T22:21:46+00:00"
+                },
+                "username": {
+                    "type": "string",
+                    "example": "example@gmail.com"
+                }
+            }
+        },
+        "models.SignInput": {
+            "type": "object",
+            "properties": {
+                "password": {
+                    "type": "string",
+                    "example": "123456"
                 },
                 "username": {
                     "type": "string",

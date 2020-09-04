@@ -4,8 +4,9 @@ import (
 	"context"
 	"log"
 	"os"
-	"sample/internal/apiserver/handlers"
-	"sample/internal/apiserver/stores"
+
+	"github.com/omekov/sample/internal/apiserver/handlers"
+	"github.com/omekov/sample/internal/apiserver/stores"
 
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
@@ -38,7 +39,7 @@ func connections() {
 		Store:  &stores.Store{},
 	}
 	if err := server.Store.ConfigureStore(ctx, MONGOURI, MONGONAME, MONGOCOLLECTION); err != nil {
-		log.Fatal("Error loading .env file", err)
+		log.Fatal("mongodb error ", err)
 	}
 	server.ConfigureRouter(PORT)
 }

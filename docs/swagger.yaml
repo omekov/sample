@@ -1,23 +1,26 @@
 definitions:
-  models.Auth:
-    properties:
-      password:
-        example: "123456"
-        type: string
-      username:
-        example: example@gmail.com
-        type: string
-    type: object
   models.Customer:
     properties:
       firstname:
         example: Adam
+        type: string
+      password:
+        example: "123456"
         type: string
       registrationDate:
         example: "2020-09-09T21:21:46+00:00"
         type: string
       releaseDate:
         example: "2020-09-09T22:21:46+00:00"
+        type: string
+      username:
+        example: example@gmail.com
+        type: string
+    type: object
+  models.SignInput:
+    properties:
+      password:
+        example: "123456"
         type: string
       username:
         example: example@gmail.com
@@ -60,14 +63,14 @@ paths:
         name: signin
         required: true
         schema:
-          $ref: '#/definitions/models.Auth'
+          $ref: '#/definitions/models.SignInput'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.Auth'
+            $ref: '#/definitions/models.SignInput'
       summary: Sign auth
       tags:
       - sign

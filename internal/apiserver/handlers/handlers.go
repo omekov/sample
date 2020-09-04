@@ -3,7 +3,8 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
-	"sample/internal/apiserver/models"
+
+	"github.com/omekov/sample/internal/apiserver/models"
 )
 
 // signIn godoc
@@ -12,14 +13,19 @@ import (
 // @Tags sign
 // @Accept  json
 // @Produce  json
-// @Param signin body models.Auth true "SignIn auth"
-// @Success 200 {object} models.Auth
+// @Param signin body models.SignInput true "SignIn auth"
+// @Success 200 {object} models.SignInput
 // @Router /signin [post]
 func (s *Server) signIn(w http.ResponseWriter, r *http.Request) {
-	var auth models.Auth
-	json.NewDecoder(r.Body).Decode(&auth)
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(auth)
+	auth := new(models.SignInput)
+	if err := json.NewDecoder(r.Body).Decode(&auth); err != nil {
+		s.error(w, r, http.StatusBadRequest, err)
+	}
+	token, err := s.Store.SignIn(auth)
+	if err != nil {
+		s.error(w, r, http.StatusInternalServerError, err)
+	}
+	s.respond(w, r, http.StatusOK, token)
 }
 
 // signUp godoc

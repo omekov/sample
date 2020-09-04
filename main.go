@@ -1,6 +1,6 @@
 package main
 
-import "sample/internal/apiserver"
+import "github.com/omekov/sample/internal/apiserver"
 
 func main() {
 	apiserver.Run()

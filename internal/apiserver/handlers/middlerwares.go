@@ -47,6 +47,7 @@ func (s *Server) logRequest(next http.Handler) http.Handler {
 
 // respond - Обработка успешного ответа
 func (s *Server) respond(w http.ResponseWriter, r *http.Request, code int, data interface{}) {
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
 	if data != nil {
 		json.NewEncoder(w).Encode(data)
