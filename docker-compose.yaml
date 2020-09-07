@@ -9,30 +9,30 @@ services:
     volumes:
       - mongodb_data_container:/data/db
     networks: 
-      - systemnetwork
+      - samplenetwork
+    restart: unless-stopped
 
-  redis:
-    container_name: sample_cache
-    image: redis:latest
-    ports:
-      - "6379:6379"
-    networks:
-      - systemnetwork
+  # redis:
+  #   container_name: sample_cache
+  #   image: redis:latest
+  #   ports:
+  #     - "6379:6379"
+  #   networks:
+  #     - systemnetwork
 
   backend:
     container_name: sample_backend
     build: .
     env_file: 
-      - .env
+      - ./.env
     volumes: 
       - .:/usr/src/app/
     ports:
-      - "8080:8080"
+      - "9090:9090"
     depends_on: 
       - mongodb
-      - redis
+      # - redis
     networks: 
-      - systemnetwork
       - samplenetwork
     restart: on-failure
 
@@ -59,9 +59,7 @@ services:
   #     - marketnetwork
       
 networks:
-  systemnetwork:
-    driver: bridge
   samplenetwork:
- 
+    driver: bridge
 volumes:
     mongodb_data_container:

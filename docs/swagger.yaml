@@ -17,6 +17,15 @@ definitions:
         example: example@gmail.com
         type: string
     type: object
+  models.Podcast:
+    properties:
+      author:
+        example: example@gmail.com
+        type: string
+      title:
+        example: title
+        type: string
+    type: object
   models.SignInput:
     properties:
       password:
@@ -30,6 +39,44 @@ info:
   contact: {}
   license: {}
 paths:
+  /podcasts:
+    get:
+      consumes:
+      - application/json
+      description: Get details of all podcasts
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Podcast'
+            type: array
+      summary: Get details of all podcasts
+      tags:
+      - podcasts
+    post:
+      consumes:
+      - application/json
+      description: Create a new podcast with the input paylod
+      parameters:
+      - description: Create podcast
+        in: body
+        name: order
+        required: true
+        schema:
+          $ref: '#/definitions/models.Podcast'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Podcast'
+      summary: Create a new podcast
+      tags:
+      - podcasts
   /profile:
     post:
       consumes:

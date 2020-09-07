@@ -21,7 +21,7 @@ func (s *Server) signIn(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewDecoder(r.Body).Decode(&auth); err != nil {
 		s.error(w, r, http.StatusBadRequest, err)
 	}
-	token, err := s.Store.SignIn(auth)
+	token, err := s.Store.SignIn(r.Context(), auth)
 	if err != nil {
 		s.error(w, r, http.StatusInternalServerError, err)
 	}
@@ -61,39 +61,48 @@ func (s *Server) profile(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(customer)
 }
 
+// createPodcast godoc
+// @Summary Create a new podcast
+// @Description Create a new podcast with the input paylod
+// @Tags podcasts
+// @Accept  json
+// @Produce  json
+// @Param order body models.Podcast true "Create podcast"
+// @Success 201 {object} models.Podcast
+// @Router /podcasts [post]
+func (s *Server) createPodcast(w http.ResponseWriter, r *http.Request) {
+	podcast := new(models.Podcast)
+	if err := json.NewDecoder(r.Body).Decode(&podcast); err != nil {
+		s.error(w, r, http.StatusBadRequest, err)
+		return
+	}
+	if err := s.Store.CreatePodcast(r.Context(), podcast); err != nil {
+		s.error(w, r, http.StatusInternalServerError, err)
+		return
+	}
+	s.respond(w, r, http.StatusCreated, nil)
+	return
+}
+
+// getPodcasts godoc
+// @Summary Get details of all podcasts
+// @Description Get details of all podcasts
+// @Tags podcasts
+// @Accept  json
+// @Produce  json
+// @Success 200 {array} models.Podcast
+// @Router /podcasts [get]
+func (s *Server) getPodcasts(w http.ResponseWriter, r *http.Request) {
+	podcasts, err := s.Store.GetAllPodcasts(r.Context())
+	if err != nil {
+		s.error(w, r, http.StatusInternalServerError, err)
+		return
+	}
+	s.respond(w, r, http.StatusOK, podcasts)
+	return
+}
+
 /*
-// createOrder godoc
-// @Summary Create a new order
-// @Description Create a new order with the input paylod
-// @Tags orders
-// @Accept  json
-// @Produce  json
-// @Param order body Order true "Create order"
-// @Success 201 {object} Order
-// @Router /orders [post]
-func createOrder(w http.ResponseWriter, r *http.Request) {
-	var order Order
-	json.NewDecoder(r.Body).Decode(&order)
-	prevOrderID++
-	order.ID = strconv.Itoa(prevOrderID)
-	orders = append(orders, order)
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(order)
-}
-
-
-// getOrders godoc
-// @Summary Get details of all orders
-// @Description Get details of all orders
-// @Tags orders
-// @Accept  json
-// @Produce  json
-// @Success 200 {array} Order
-// @Router /orders [get]
-func getOrders(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(orders)
-}
 
 // getOrder godoc
 // @Summary Get details for a given orderId
@@ -163,4 +172,5 @@ func deleteOrder(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 }
+
 */

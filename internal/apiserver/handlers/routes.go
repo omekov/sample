@@ -29,7 +29,7 @@ type Server struct {
 // @contact.email umekovazamat@gmail.com
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
-// @host localhost:8080
+// @host localhost:9090
 // @BasePath /
 func (s *Server) ConfigureRouter(PORT string) *mux.Router {
 	s.Router.Use(mux.CORSMethodMiddleware(s.Router))
@@ -37,6 +37,8 @@ func (s *Server) ConfigureRouter(PORT string) *mux.Router {
 	s.Router.HandleFunc("/signin", s.signIn).Methods(http.MethodPost)
 	s.Router.HandleFunc("/signup", s.signUp).Methods(http.MethodPost)
 	s.Router.HandleFunc("/profile", s.profile).Methods(http.MethodGet)
+	s.Router.HandleFunc("/podcasts", s.createPodcast).Methods(http.MethodPost)
+	s.Router.HandleFunc("/podcasts", s.getPodcasts).Methods(http.MethodGet)
 
 	// Swagger
 	s.Router.PathPrefix("/swagger").Handler(httpSwagger.WrapHandler)

@@ -5,6 +5,64 @@
         "license": {}
     },
     "paths": {
+        "/podcasts": {
+            "get": {
+                "description": "Get details of all podcasts",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "podcasts"
+                ],
+                "summary": "Get details of all podcasts",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Podcast"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a new podcast with the input paylod",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "podcasts"
+                ],
+                "summary": "Create a new podcast",
+                "parameters": [
+                    {
+                        "description": "Create podcast",
+                        "name": "order",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.Podcast"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/models.Podcast"
+                        }
+                    }
+                }
+            }
+        },
         "/profile": {
             "post": {
                 "description": "Profile customer the input paylod",
@@ -131,6 +189,19 @@
                 "username": {
                     "type": "string",
                     "example": "example@gmail.com"
+                }
+            }
+        },
+        "models.Podcast": {
+            "type": "object",
+            "properties": {
+                "author": {
+                    "type": "string",
+                    "example": "example@gmail.com"
+                },
+                "title": {
+                    "type": "string",
+                    "example": "title"
                 }
             }
         },
