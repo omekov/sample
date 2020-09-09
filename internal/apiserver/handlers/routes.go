@@ -32,6 +32,7 @@ type Server struct {
 // @host localhost:9090
 // @BasePath /
 func (s *Server) ConfigureRouter(PORT string) *mux.Router {
+	s.Router.Use(s.setRequestID)
 	s.Router.Use(mux.CORSMethodMiddleware(s.Router))
 	s.Router.Use(s.logRequest)
 	s.Router.HandleFunc("/signin", s.signIn).Methods(http.MethodPost)

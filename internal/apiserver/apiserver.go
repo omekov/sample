@@ -9,6 +9,8 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/omekov/sample/internal/apiserver/handlers"
 	"github.com/omekov/sample/internal/apiserver/stores"
+	"github.com/omekov/sample/internal/apiserver/stores/customers"
+	"github.com/omekov/sample/internal/apiserver/stores/podcasts"
 
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
@@ -50,8 +52,12 @@ func connections() {
 		Router: mux.NewRouter(),
 		Logger: logrus.New(),
 		Store: &stores.Store{
-			AuthCollection:    db.Collection(MONGOAUTHCOLLECTION),
-			PodcastCollection: db.Collection(MONGOPODCASTCOLLECTION),
+			Customers: customers.Customer{
+				Collection: db.Collection(MONGOAUTHCOLLECTION),
+			},
+			Podcasts: podcasts.Podcast{
+				Collection: db.Collection(MONGOPODCASTCOLLECTION),
+			},
 		},
 	}
 	server.ConfigureRouter(PORT)

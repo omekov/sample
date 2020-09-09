@@ -17,15 +17,18 @@ import (
 // @Success 200 {object} models.SignInput
 // @Router /signin [post]
 func (s *Server) signIn(w http.ResponseWriter, r *http.Request) {
-	auth := new(models.SignInput)
+	var auth *models.SignInput
 	if err := json.NewDecoder(r.Body).Decode(&auth); err != nil {
 		s.error(w, r, http.StatusBadRequest, err)
+		return
 	}
-	token, err := s.Store.SignIn(r.Context(), auth)
+	token, err := s.Store.Customers.SignIn(r.Context(), auth)
 	if err != nil {
 		s.error(w, r, http.StatusInternalServerError, err)
+		return
 	}
 	s.respond(w, r, http.StatusOK, token)
+	return
 }
 
 // signUp godoc
@@ -38,11 +41,17 @@ func (s *Server) signIn(w http.ResponseWriter, r *http.Request) {
 // @Success 201 {object} models.Customer
 // @Router /signup [post]
 func (s *Server) signUp(w http.ResponseWriter, r *http.Request) {
-	var customer models.Customer
-	json.NewDecoder(r.Body).Decode(&customer)
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(customer)
-	// r.Response.StatusCode = http.StatusCreated
+	var customer *models.Customer
+	if err := json.NewDecoder(r.Body).Decode(&customer); err != nil {
+		s.error(w, r, http.StatusBadRequest, err)
+		return
+	}
+	if err := s.Store.Customers.SignUp(r.Context(), customer); err != nil {
+		s.error(w, r, http.StatusInternalServerError, err)
+		return
+	}
+	s.respond(w, r, http.StatusCreated, nil)
+	return
 }
 
 // profile godoc
@@ -76,7 +85,7 @@ func (s *Server) createPodcast(w http.ResponseWriter, r *http.Request) {
 		s.error(w, r, http.StatusBadRequest, err)
 		return
 	}
-	if err := s.Store.CreatePodcast(r.Context(), podcast); err != nil {
+	if err := s.Store.Podcasts.CreatePodcast(r.Context(), podcast); err != nil {
 		s.error(w, r, http.StatusInternalServerError, err)
 		return
 	}
@@ -93,7 +102,7 @@ func (s *Server) createPodcast(w http.ResponseWriter, r *http.Request) {
 // @Success 200 {array} models.Podcast
 // @Router /podcasts [get]
 func (s *Server) getPodcasts(w http.ResponseWriter, r *http.Request) {
-	podcasts, err := s.Store.GetAllPodcasts(r.Context())
+	podcasts, err := s.Store.Podcasts.GetAllPodcasts(r.Context())
 	if err != nil {
 		s.error(w, r, http.StatusInternalServerError, err)
 		return

@@ -19,6 +19,7 @@ type Customer struct {
 	Username         string    `json:"username,omitempty" example:"example@gmail.com"`
 	FirstName        string    `json:"firstname,omitempty" example:"Adam"`
 	Password         string    `json:"password,omitempty" example:"123456"`
+	Blocked          bool      `json:"blocked,omitempty" example:"false"`
 	RegistrationDate time.Time `json:"registrationDate,omitempty" example:"2020-09-09T21:21:46+00:00"`
 	ReleaseDate      time.Time `json:"releaseDate,omitempty" example:"2020-09-09T22:21:46+00:00"`
 }
