@@ -1,71 +1,30 @@
 {
     "swagger": "2.0",
     "info": {
-        "contact": {},
-        "license": {}
-    },
-    "paths": {
-        "/podcasts": {
-            "get": {
-                "description": "Get details of all podcasts",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "podcasts"
-                ],
-                "summary": "Get details of all podcasts",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/models.Podcast"
-                            }
-                        }
-                    }
-                }
-            },
-            "post": {
-                "description": "Create a new podcast with the input paylod",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "podcasts"
-                ],
-                "summary": "Create a new podcast",
-                "parameters": [
-                    {
-                        "description": "Create podcast",
-                        "name": "order",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.Podcast"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/models.Podcast"
-                        }
-                    }
-                }
-            }
+        "description": "This is a sample service for managment",
+        "title": "Sample API",
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {
+            "name": "API Support",
+            "email": "umekovazamat@gmail.com"
         },
-        "/profile": {
-            "post": {
-                "description": "Profile customer the input paylod",
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
+        "version": "2.0"
+    },
+    "host": "localhost:9090",
+    "basePath": "/",
+    "paths": {
+        "/api/whoami": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "whoami input header Authorization Bearer \u003ctoken\u003e, return parse in Claims",
                 "consumes": [
                     "application/json"
                 ],
@@ -75,23 +34,42 @@
                 "tags": [
                     "sign"
                 ],
-                "summary": "Profile customer",
-                "parameters": [
-                    {
-                        "description": "Profile customer",
-                        "name": "signup",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.Customer"
-                        }
-                    }
-                ],
+                "summary": "Parse token",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.Customer"
+                            "$ref": "#/definitions/models.Claims"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
                         }
                     }
                 }
@@ -127,6 +105,36 @@
                         "schema": {
                             "$ref": "#/definitions/models.SignInput"
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
                     }
                 }
             }
@@ -161,15 +169,58 @@
                         "schema": {
                             "$ref": "#/definitions/models.Customer"
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
                     }
                 }
             }
         }
     },
     "definitions": {
+        "models.Claims": {
+            "type": "object",
+            "properties": {
+                "customer": {
+                    "type": "object",
+                    "$ref": "#/definitions/models.Customer"
+                }
+            }
+        },
         "models.Customer": {
             "type": "object",
             "properties": {
+                "blocked": {
+                    "type": "boolean",
+                    "example": false
+                },
                 "firstname": {
                     "type": "string",
                     "example": "Adam"
@@ -192,16 +243,12 @@
                 }
             }
         },
-        "models.Podcast": {
+        "models.Error": {
             "type": "object",
             "properties": {
-                "author": {
+                "error": {
                     "type": "string",
-                    "example": "example@gmail.com"
-                },
-                "title": {
-                    "type": "string",
-                    "example": "title"
+                    "example": "error"
                 }
             }
         },
@@ -217,6 +264,13 @@
                     "example": "example@gmail.com"
                 }
             }
+        }
+    },
+    "securityDefinitions": {
+        "ApiKeyAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }

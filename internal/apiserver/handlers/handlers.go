@@ -15,6 +15,11 @@ import (
 // @Produce  json
 // @Param signin body models.SignInput true "SignIn auth"
 // @Success 200 {object} models.SignInput
+// @Failure 400 {object} models.Error
+// @Failure 401 {object} models.Error
+// @Failure 403 {object} models.Error
+// @Failure 404 {object} models.Error
+// @Failure 500 {object} models.Error
 // @Router /signin [post]
 func (s *Server) signIn(w http.ResponseWriter, r *http.Request) {
 	var auth *models.SignInput
@@ -39,6 +44,11 @@ func (s *Server) signIn(w http.ResponseWriter, r *http.Request) {
 // @Produce  json
 // @Param signup body models.Customer true "SignUp customer"
 // @Success 201 {object} models.Customer
+// @Failure 400 {object} models.Error
+// @Failure 401 {object} models.Error
+// @Failure 403 {object} models.Error
+// @Failure 404 {object} models.Error
+// @Failure 500 {object} models.Error
 // @Router /signup [post]
 func (s *Server) signUp(w http.ResponseWriter, r *http.Request) {
 	var customer *models.Customer
@@ -54,61 +64,24 @@ func (s *Server) signUp(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-// profile godoc
-// @Summary Profile customer
-// @Description Profile customer the input paylod
+// whoami godoc
+// @Summary Parse token
+// @Description whoami input header Authorization Bearer <token>, return parse in Claims
 // @Tags sign
 // @Accept  json
 // @Produce  json
-// @Param signup body models.Customer true "Profile customer"
-// @Success 200 {object} models.Customer
-// @Router /profile [post]
-func (s *Server) profile(w http.ResponseWriter, r *http.Request) {
-	var customer models.Customer
-	json.NewDecoder(r.Body).Decode(&customer)
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(customer)
-}
-
-// createPodcast godoc
-// @Summary Create a new podcast
-// @Description Create a new podcast with the input paylod
-// @Tags podcasts
-// @Accept  json
-// @Produce  json
-// @Param order body models.Podcast true "Create podcast"
-// @Success 201 {object} models.Podcast
-// @Router /podcasts [post]
-func (s *Server) createPodcast(w http.ResponseWriter, r *http.Request) {
-	podcast := new(models.Podcast)
-	if err := json.NewDecoder(r.Body).Decode(&podcast); err != nil {
-		s.error(w, r, http.StatusBadRequest, err)
-		return
+// @Success 200 {object} models.Claims
+// @Failure 400 {object} models.Error
+// @Failure 401 {object} models.Error
+// @Failure 403 {object} models.Error
+// @Failure 404 {object} models.Error
+// @Failure 500 {object} models.Error
+// @Security ApiKeyAuth
+// @Router /api/whoami [get]
+func (s *Server) whoami() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		s.respond(w, r, http.StatusOK, r.Context().Value(ctxKeyUser).(*models.Claims))
 	}
-	if err := s.Store.Podcasts.CreatePodcast(r.Context(), podcast); err != nil {
-		s.error(w, r, http.StatusInternalServerError, err)
-		return
-	}
-	s.respond(w, r, http.StatusCreated, nil)
-	return
-}
-
-// getPodcasts godoc
-// @Summary Get details of all podcasts
-// @Description Get details of all podcasts
-// @Tags podcasts
-// @Accept  json
-// @Produce  json
-// @Success 200 {array} models.Podcast
-// @Router /podcasts [get]
-func (s *Server) getPodcasts(w http.ResponseWriter, r *http.Request) {
-	podcasts, err := s.Store.Podcasts.GetAllPodcasts(r.Context())
-	if err != nil {
-		s.error(w, r, http.StatusInternalServerError, err)
-		return
-	}
-	s.respond(w, r, http.StatusOK, podcasts)
-	return
 }
 
 /*

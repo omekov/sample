@@ -3,14 +3,13 @@ package customers
 import (
 	"time"
 
-	"github.com/dgrijalva/jwt-go"
+	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/omekov/sample/internal/apiserver/models"
 	"golang.org/x/crypto/bcrypt"
 )
 
-func createJWT(customer *models.Customer, auth *models.SignInput) (string, error) {
-	err := bcrypt.CompareHashAndPassword([]byte(customer.Password), []byte(auth.Password))
-	if err != nil {
+func (c *Customer) generateJWT(customer *models.Customer, auth *models.SignInput) (string, error) {
+	if err := bcrypt.CompareHashAndPassword([]byte(customer.Password), []byte(auth.Password)); err != nil {
 		return "", err
 	}
 	expirationTime := time.Now().Add(5 * time.Minute).Unix()
@@ -21,7 +20,7 @@ func createJWT(customer *models.Customer, auth *models.SignInput) (string, error
 			ExpiresAt: expirationTime,
 		},
 	})
-	return token.SignedString([]byte("secret"))
+	return token.SignedString(c.TokenSecret)
 }
 func encryptString(p string) (string, error) {
 	b, err := bcrypt.GenerateFromPassword([]byte(p), bcrypt.MinCost)
@@ -31,13 +30,23 @@ func encryptString(p string) (string, error) {
 	return string(b), nil
 }
 
-// func verifyToken(tokenString string) (string, error) {
-// 	claims := jwt.MapClaims{}
-// 	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
-// 		return jwtSecretKey, nil
-// 	})
-// 	if err != nil {
-// 		return "", err
-// 	}
-// 	return token, nil
-// }
+func (c *Customer) parseToken(tokenString string) (*jwt.Token, error) {
+	return jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, ErrInvalidAccessToken
+		}
+		return c.TokenSecret, nil
+	})
+}
+
+func parseClaims(token *jwt.Token) *models.Claims {
+	var result models.Claims
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if ok && token.Valid {
+		result.Customer.Username = claims["Customer"].(string)
+		result.Customer.FirstName = claims["firstname"].(string)
+		result.Customer.RegistrationDate = claims["registrationDate"].(time.Time)
+		result.ExpiresAt = claims["ExpiresAt"].(int64)
+	}
+	return &result
+}

@@ -1,6 +1,16 @@
+basePath: /
 definitions:
+  models.Claims:
+    properties:
+      customer:
+        $ref: '#/definitions/models.Customer'
+        type: object
+    type: object
   models.Customer:
     properties:
+      blocked:
+        example: false
+        type: boolean
       firstname:
         example: Adam
         type: string
@@ -17,13 +27,10 @@ definitions:
         example: example@gmail.com
         type: string
     type: object
-  models.Podcast:
+  models.Error:
     properties:
-      author:
-        example: example@gmail.com
-        type: string
-      title:
-        example: title
+      error:
+        example: error
         type: string
     type: object
   models.SignInput:
@@ -35,68 +42,54 @@ definitions:
         example: example@gmail.com
         type: string
     type: object
+host: localhost:9090
 info:
-  contact: {}
-  license: {}
+  contact:
+    email: umekovazamat@gmail.com
+    name: API Support
+  description: This is a sample service for managment
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Sample API
+  version: "2.0"
 paths:
-  /podcasts:
+  /api/whoami:
     get:
       consumes:
       - application/json
-      description: Get details of all podcasts
+      description: whoami input header Authorization Bearer <token>, return parse in Claims
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/models.Podcast'
-            type: array
-      summary: Get details of all podcasts
-      tags:
-      - podcasts
-    post:
-      consumes:
-      - application/json
-      description: Create a new podcast with the input paylod
-      parameters:
-      - description: Create podcast
-        in: body
-        name: order
-        required: true
-        schema:
-          $ref: '#/definitions/models.Podcast'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
+            $ref: '#/definitions/models.Claims'
+        "400":
+          description: Bad Request
           schema:
-            $ref: '#/definitions/models.Podcast'
-      summary: Create a new podcast
-      tags:
-      - podcasts
-  /profile:
-    post:
-      consumes:
-      - application/json
-      description: Profile customer the input paylod
-      parameters:
-      - description: Profile customer
-        in: body
-        name: signup
-        required: true
-        schema:
-          $ref: '#/definitions/models.Customer'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
+            $ref: '#/definitions/models.Error'
+        "401":
+          description: Unauthorized
           schema:
-            $ref: '#/definitions/models.Customer'
-      summary: Profile customer
+            $ref: '#/definitions/models.Error'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Error'
+      security:
+      - ApiKeyAuth: []
+      summary: Parse token
       tags:
       - sign
   /signin:
@@ -118,6 +111,26 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/models.SignInput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Error'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Error'
       summary: Sign auth
       tags:
       - sign
@@ -140,7 +153,32 @@ paths:
           description: Created
           schema:
             $ref: '#/definitions/models.Customer'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Error'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Error'
       summary: Sign Up new customer
       tags:
       - sign
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

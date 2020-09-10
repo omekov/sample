@@ -10,7 +10,6 @@ import (
 	"github.com/omekov/sample/internal/apiserver/handlers"
 	"github.com/omekov/sample/internal/apiserver/stores"
 	"github.com/omekov/sample/internal/apiserver/stores/customers"
-	"github.com/omekov/sample/internal/apiserver/stores/podcasts"
 
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
@@ -27,6 +26,8 @@ var (
 	MONGOPODCASTCOLLECTION string = ""
 	// MONGONAME ...
 	MONGONAME string = ""
+	// TOKENSECRET ...
+	TOKENSECRET string = ""
 )
 
 func connections() {
@@ -42,6 +43,7 @@ func connections() {
 	MONGONAME = os.Getenv("MONGONAME")
 	MONGOAUTHCOLLECTION = os.Getenv("MONGOAUTHCOLLECTION")
 	MONGOPODCASTCOLLECTION = os.Getenv("MONGOPODCASTCOLLECTION")
+	TOKENSECRET = os.Getenv("TOKENSECRET")
 	PORT = os.Getenv("PORT")
 	db, err := stores.ConfigureStore(MONGOURI, MONGONAME)
 	if err != nil {
@@ -53,10 +55,8 @@ func connections() {
 		Logger: logrus.New(),
 		Store: &stores.Store{
 			Customers: customers.Customer{
-				Collection: db.Collection(MONGOAUTHCOLLECTION),
-			},
-			Podcasts: podcasts.Podcast{
-				Collection: db.Collection(MONGOPODCASTCOLLECTION),
+				Collection:  db.Collection(MONGOAUTHCOLLECTION),
+				TokenSecret: []byte(TOKENSECRET),
 			},
 		},
 	}

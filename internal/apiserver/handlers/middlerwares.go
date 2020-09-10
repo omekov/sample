@@ -3,10 +3,13 @@ package handlers
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/omekov/sample/internal/apiserver/models"
 	"github.com/sirupsen/logrus"
 )
 
@@ -23,8 +26,36 @@ func (w *responseWriter) WriteHeader(statusCode int) {
 type ctxKey int
 
 const (
-	ctxKeyRequestID ctxKey = iota
+	ctxKeyUser ctxKey = iota
+	ctxKeyRequestID
 )
+
+var (
+	errIncorrectEmailPassword = errors.New("Incorrect Email or Password")
+	errNotAuthenticated       = errors.New("not authenticated")
+)
+
+func (s *Server) authenticateUser(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		tokenHeader := r.Header.Get("Authorization")
+		if tokenHeader == "" {
+			s.error(w, r, http.StatusForbidden, errNotAuthenticated)
+			return
+		}
+		splitted := strings.Split(tokenHeader, " ")
+		if len(splitted) != 2 {
+			s.error(w, r, http.StatusForbidden, errNotAuthenticated)
+			return
+		}
+		u, err := s.Store.Customers.WhoAmi(r.Context(), splitted)
+		if err != nil {
+			s.error(w, r, http.StatusForbidden, err)
+			return
+		}
+
+		next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), ctxKeyUser, u)))
+	})
+}
 
 // logRequest - middleware для логирование запросов
 func (s *Server) logRequest(next http.Handler) http.Handler {
@@ -65,5 +96,5 @@ func (s *Server) respond(w http.ResponseWriter, r *http.Request, code int, data 
 
 // error - Обработка ошибочного ответа
 func (s *Server) error(w http.ResponseWriter, r *http.Request, code int, err error) {
-	s.respond(w, r, code, map[string]string{"error": err.Error()})
+	s.respond(w, r, code, models.Error{Error: err.Error()})
 }

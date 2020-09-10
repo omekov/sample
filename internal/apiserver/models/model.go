@@ -24,7 +24,6 @@ type Customer struct {
 	ReleaseDate      time.Time `json:"releaseDate,omitempty" example:"2020-09-09T22:21:46+00:00"`
 }
 
-type Podcast struct {
-	Title  string `json:"title,omitempty" example:"title"`
-	Author string `json:"author,omiempty" example:"example@gmail.com"`
+type Error struct {
+	Error string `json:"error,omitempty" example:"error"`
 }

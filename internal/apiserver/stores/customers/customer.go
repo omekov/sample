@@ -2,14 +2,17 @@ package customers
 
 import (
 	"context"
+	"fmt"
 	"time"
 
+	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/omekov/sample/internal/apiserver/models"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type Customer struct {
-	Collection *mongo.Collection
+	Collection  *mongo.Collection
+	TokenSecret []byte
 }
 
 // SignIn ...
@@ -18,7 +21,7 @@ func (c *Customer) SignIn(ctx context.Context, auth *models.SignInput) (string, 
 	if err != nil {
 		return "", err
 	}
-	return createJWT(customer, auth)
+	return c.generateJWT(customer, auth)
 }
 
 // SignUp ...
@@ -41,6 +44,32 @@ func (c *Customer) SignUp(ctx context.Context, customer *models.Customer) error 
 }
 
 // Profile ...
-func (c *Customer) Profile(ctx context.Context, token string) error {
-	return nil
+func (c *Customer) Profile(ctx context.Context, token string) (*models.Claims, error) {
+	jwtToken, err := c.parseToken(token)
+	if err != nil {
+		return nil, err
+	}
+	return parseClaims(jwtToken), nil
+}
+
+// Profile ...
+func (c *Customer) WhoAmi(ctx context.Context, splitted []string) (*models.Claims, error) {
+	tokenPart := splitted[1] //Получаем вторую часть токена
+	tk := &models.Claims{}
+
+	token, err := jwt.ParseWithClaims(tokenPart, tk, func(token *jwt.Token) (interface{}, error) {
+		return c.TokenSecret, nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	if !token.Valid {
+		return nil, ErrInvalidAccessToken
+	}
+
+	//Всё прошло хорошо, продолжаем выполнение запроса
+	fmt.Sprintf("Username -  %s", tk.Customer.Username) //Полезно для мониторинга
+	return tk, nil
 }

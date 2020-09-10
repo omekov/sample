@@ -18,74 +18,28 @@ var doc = `{
     "info": {
         "description": "{{.Description}}",
         "title": "{{.Title}}",
-        "contact": {},
-        "license": {},
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {
+            "name": "API Support",
+            "email": "umekovazamat@gmail.com"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
         "version": "{{.Version}}"
     },
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/podcasts": {
+        "/api/whoami": {
             "get": {
-                "description": "Get details of all podcasts",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "podcasts"
-                ],
-                "summary": "Get details of all podcasts",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/models.Podcast"
-                            }
-                        }
-                    }
-                }
-            },
-            "post": {
-                "description": "Create a new podcast with the input paylod",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "podcasts"
-                ],
-                "summary": "Create a new podcast",
-                "parameters": [
+                "security": [
                     {
-                        "description": "Create podcast",
-                        "name": "order",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.Podcast"
-                        }
+                        "ApiKeyAuth": []
                     }
                 ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/models.Podcast"
-                        }
-                    }
-                }
-            }
-        },
-        "/profile": {
-            "post": {
-                "description": "Profile customer the input paylod",
+                "description": "whoami input header Authorization Bearer \u003ctoken\u003e, return parse in Claims",
                 "consumes": [
                     "application/json"
                 ],
@@ -95,23 +49,42 @@ var doc = `{
                 "tags": [
                     "sign"
                 ],
-                "summary": "Profile customer",
-                "parameters": [
-                    {
-                        "description": "Profile customer",
-                        "name": "signup",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.Customer"
-                        }
-                    }
-                ],
+                "summary": "Parse token",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.Customer"
+                            "$ref": "#/definitions/models.Claims"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
                         }
                     }
                 }
@@ -147,6 +120,36 @@ var doc = `{
                         "schema": {
                             "$ref": "#/definitions/models.SignInput"
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
                     }
                 }
             }
@@ -181,15 +184,58 @@ var doc = `{
                         "schema": {
                             "$ref": "#/definitions/models.Customer"
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
                     }
                 }
             }
         }
     },
     "definitions": {
+        "models.Claims": {
+            "type": "object",
+            "properties": {
+                "customer": {
+                    "type": "object",
+                    "$ref": "#/definitions/models.Customer"
+                }
+            }
+        },
         "models.Customer": {
             "type": "object",
             "properties": {
+                "blocked": {
+                    "type": "boolean",
+                    "example": false
+                },
                 "firstname": {
                     "type": "string",
                     "example": "Adam"
@@ -212,16 +258,12 @@ var doc = `{
                 }
             }
         },
-        "models.Podcast": {
+        "models.Error": {
             "type": "object",
             "properties": {
-                "author": {
+                "error": {
                     "type": "string",
-                    "example": "example@gmail.com"
-                },
-                "title": {
-                    "type": "string",
-                    "example": "title"
+                    "example": "error"
                 }
             }
         },
@@ -238,6 +280,13 @@ var doc = `{
                 }
             }
         }
+    },
+    "securityDefinitions": {
+        "ApiKeyAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
     }
 }`
 
@@ -252,12 +301,12 @@ type swaggerInfo struct {
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = swaggerInfo{
-	Version:     "",
-	Host:        "",
-	BasePath:    "",
+	Version:     "2.0",
+	Host:        "localhost:9090",
+	BasePath:    "/",
 	Schemes:     []string{},
-	Title:       "",
-	Description: "",
+	Title:       "Sample API",
+	Description: "This is a sample service for managment",
 }
 
 type s struct{}

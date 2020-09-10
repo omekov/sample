@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/omekov/sample/internal/apiserver/stores/customers"
-	"github.com/omekov/sample/internal/apiserver/stores/podcasts"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -13,7 +12,6 @@ import (
 // Store ...
 type Store struct {
 	Customers customers.Customer
-	Podcasts  podcasts.Podcast
 }
 
 // ConfigureStore ...

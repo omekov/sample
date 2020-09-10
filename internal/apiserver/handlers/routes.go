@@ -21,25 +21,15 @@ type Server struct {
 }
 
 // ConfigureRouter ...
-// @title Sample API
-// @version 1.0
-// @description This is a sample service for managment
-// @termsOfService http://swagger.io/terms/
-// @contact.name API Support
-// @contact.email umekovazamat@gmail.com
-// @license.name Apache 2.0
-// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
-// @host localhost:9090
-// @BasePath /
 func (s *Server) ConfigureRouter(PORT string) *mux.Router {
 	s.Router.Use(s.setRequestID)
 	s.Router.Use(mux.CORSMethodMiddleware(s.Router))
 	s.Router.Use(s.logRequest)
 	s.Router.HandleFunc("/signin", s.signIn).Methods(http.MethodPost)
 	s.Router.HandleFunc("/signup", s.signUp).Methods(http.MethodPost)
-	s.Router.HandleFunc("/profile", s.profile).Methods(http.MethodGet)
-	s.Router.HandleFunc("/podcasts", s.createPodcast).Methods(http.MethodPost)
-	s.Router.HandleFunc("/podcasts", s.getPodcasts).Methods(http.MethodGet)
+	private := s.Router.PathPrefix("/api").Subrouter()
+	private.Use(s.authenticateUser)
+	private.HandleFunc("/whoami", s.whoami()).Methods("GET")
 
 	// Swagger
 	s.Router.PathPrefix("/swagger").Handler(httpSwagger.WrapHandler)
