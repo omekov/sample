@@ -20,21 +20,21 @@ services:
   #   networks:
   #     - systemnetwork
 
-  backend:
-    container_name: sample_backend
-    build: .
-    env_file: 
-      - ./.env
-    volumes: 
-      - .:/usr/src/app/
-    ports:
-      - "9090:9090"
-    depends_on: 
-      - mongodb
-      # - redis
-    networks: 
-      - samplenetwork
-    restart: on-failure
+  # backend:
+  #   container_name: sample_backend
+  #   build: .
+  #   env_file: 
+  #     - ./.env
+  #   volumes: 
+  #     - .:/usr/src/app/
+  #   ports:
+  #     - "9090:9090"
+  #   depends_on: 
+  #     - mongodb
+  #     # - redis
+  #   networks: 
+  #     - samplenetwork
+  #   restart: on-failure
 
   # frontend:
   #   container_name: sample_frontend

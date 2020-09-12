@@ -4,7 +4,8 @@ https://www.digitalocean.com/community/tutorials/how-to-use-go-with-mongodb-usin
 https://www.soberkoder.com/swagger-go-api-swaggo/
 
 https://www.mongodb.com/blog/post/quick-start-golang--mongodb--how-to-create-documents
-
+https://medium.com/better-programming/unit-testing-code-using-the-mongo-go-driver-in-golang-7166d1aa72c0
+https://medium.com/@jcox250/password-hash-salt-using-golang-b041dc94cb72
 
 Это проект относить второму знакомству моего прохождения с golang. Повысить практику и писать и писать код.
 
@@ -28,18 +29,30 @@ https://www.mongodb.com/blog/post/quick-start-golang--mongodb--how-to-create-doc
 - Проекте должено использоваться swagger | Done
 
 Вторая задача:
-- У проекта должна быть авторизация
-- У проекта должна быть регистрация
-- У проекта должна быть приватные api через токен
+- У проекта должна быть авторизация | Done
+- У проекта должна быть регистрация | Done
+- У проекта должна быть приватные api через токен | Done
+- Тесты на все апи и бд
+
 
 Третья задача:
+- Отправка на почту временный код активация при регистраций
+- Смена пароля отправить временный код для возможности сменить пароль
+
+
+Четвёртая задача:
 - Онлайн чат через websocket
+- У проекта должно быть возможность создавать чат (то есть hub)
+- Возможность подключаться в чат 
+- Возможность ред. название чата
+- Возможность удалять чат
+
+Четвёртая задача:
 - React, Redux подключаем наши api
 - выносим в nginx
 - если получится за деплои в google cloud
 
-
-Четвёртая задача:
+Пятая задача:
 - Пока не придумал =)
 
 

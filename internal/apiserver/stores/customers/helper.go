@@ -30,8 +30,8 @@ func encryptString(p string) (string, error) {
 	return string(b), nil
 }
 
-func (c *Customer) parseToken(tokenString string) (*jwt.Token, error) {
-	return jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+func (c *Customer) parseToken(tokenString string, claims *models.Claims) (*jwt.Token, error) {
+	return jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, ErrInvalidAccessToken
 		}
