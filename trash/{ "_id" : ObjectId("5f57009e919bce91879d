@@ -1,0 +1,6 @@
+{ "_id" : ObjectId("5f57009e919bce91879dd81e"), "username" : "example@gmail.com", "password" : "example@gmail.com", "firstname" : "Adam", "registrationDate" : ISODate("2020-09-08T03:55:10.526Z"), "releaseDate" : ISODate("2020-09-08T03:55:10.526Z") }
+{ "_id" : ObjectId("5f57031a919bce91879dd81f"), "username" : "exampleee@gmail.com", "password" : "exampleee@gmail.com", "firstname" : "Adam", "registrationDate" : ISODate("2020-09-08T04:05:46.188Z"), "releaseDate" : ISODate("2020-09-08T04:05:46.188Z") }
+
+db.customers.deleteOne( {"_id" : ObjectId("5f57009e919bce91879dd81e")});
+db.customers.deleteOne( {"_id" : ObjectId("5f570697f3d883ce500c5ff9")});
+db.customers.deleteOne( {"_id" : ObjectId("5f57031a919bce91879dd81f")});
