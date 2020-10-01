@@ -27,12 +27,12 @@ const Landing = () => {
                     <Menu.Item>
                         <Image size='mini' src='/logo.png' />
                     </Menu.Item>
-                    <Menu.Item as={Link} to="/" header>Sample</Menu.Item>
-                    <Menu.Item as={Link} to="/frontend">Frontend</Menu.Item>
-                    <Menu.Item as={Link} to="/backend">Backend</Menu.Item>
+                    <Menu.Item as={Link} to='/' header>Sample</Menu.Item>
+                    <Menu.Item as={Link} to='/frontend'>Frontend</Menu.Item>
+                    <Menu.Item as={Link} to='/backend'>Backend</Menu.Item>
 
                     <Menu.Menu position='right'>
-                        <Menu.Item as={Link} to="/signin"><Icon name='sign-in' size='big' /></Menu.Item>
+                        <Menu.Item as={Link} to='/signin'><Icon name='sign-in' size='big' /></Menu.Item>
                     </Menu.Menu>
                 </Container>
             </Menu>
@@ -53,7 +53,7 @@ const Landing = () => {
                     people, such as hunting, herding, pulling loads, protection, assisting
                     police and military, companionship, and, more recently, aiding
                     handicapped individuals. This impact on human society has given them the
-                    nickname "man's best friend" in the Western world. In some cultures,
+                    nickname 'man's best friend' in the Western world. In some cultures,
                     however, dogs are also a source of meat.
       </p>
             </Container>
@@ -74,7 +74,7 @@ const Landing = () => {
                     people, such as hunting, herding, pulling loads, protection, assisting
                     police and military, companionship, and, more recently, aiding
                     handicapped individuals. This impact on human society has given them the
-                    nickname "man's best friend" in the Western world. In some cultures,
+                    nickname 'man's best friend' in the Western world. In some cultures,
                     however, dogs are also a source of meat.
       </p>
             </Container>

@@ -2,31 +2,33 @@ const path = require('path')
 // для того чтобы загрузить .env
 require('dotenv').config()
 // сам webpack
-const webpack = require('webpack')
-// Для парсинга html файлов. 
-const HtmlWebpackPlugin = require('html-webpack-plugin')
-// Для линтера typescipt
-const TslintWebpackPlugin = require('tslint-webpack-plugin')
+import webpack from 'webpack'
+// Для чтения html файлов. И его настроит 
+import HtmlWebpackPlugin from 'html-webpack-plugin'
 // Для очиститки dist 
-const { CleanWebpackPlugin } = require('clean-webpack-plugin')
+import { CleanWebpackPlugin } from 'clean-webpack-plugin'
 // Для того чтобы создать css 
-const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+import MiniCssExtractPlugin from 'mini-css-extract-plugin'
 // Для копирование. Пример с src в dist
-const CopyWebpackPlugin = require('copy-webpack-plugin')
+import CopyWebpackPlugin from 'copy-webpack-plugin'
 // Для минимизации css в одну строку
-const OptimizeCssAssetWebpackPlugin = require('optimize-css-assets-webpack-plugin')
+import OptimizeCssAssetWebpackPlugin from 'optimize-css-assets-webpack-plugin'
 // для минимизации js в одну строку
-const TerserWebpackPlugin = require('terser-webpack-plugin')
+import TerserWebpackPlugin from 'terser-webpack-plugin'
 // для просмотра оптимизаций
-const {BundleAnalyzerPlugin} = require('webpack-bundle-analyzer')
-// для очистки лишних css
-const CleanCss = require('clean-css');
+import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer'
+// Вместо eslint-loader
+import ESLintPlugin, {Options} from 'eslint-webpack-plugin'
 
-const PORT = process.env.PORT || 8080
-const isDev = process.env.NODE_ENV === 'development'
-const isPord = process.env.NODE_ENV === 'production'
+// для очистки лишних css
+import CleanCSS from 'clean-css'
+const PORT = parseInt(process.env.PORT || '8080')
+const mode = process.env.NODE_ENV == 'production' ? 'production' : 'development'
+const HOST = process.env.HOST || 'localhost'
+const isDev = mode === 'development'
+const isPord = mode === 'production'
 // Чтобы разделить по чанком, если встречается lazy load
-const optimization = () => {
+const optimization = (): webpack.Options.Optimization => {
     return {
         splitChunks: {
             chunks: 'all'
@@ -34,7 +36,7 @@ const optimization = () => {
         minimizer: isPord ? [
             new OptimizeCssAssetWebpackPlugin({
                 // assetNameRegExp: /\.css$/g,
-                // cssProcessor: CleanCss,
+                // cssProcessor: CleanCSS,
                 // cssProcessorOptions: {
                 //     sourceMap: true,
                 // },
@@ -47,9 +49,9 @@ const optimization = () => {
 // Добавления паттерн хэша если в прод. Чтобы не кэшировались файлы
 const filename = (ext = '[ext]') => isDev ? `[name].${ext}` : `[name].[hash].${ext}`
 // path чтобы не повторять
-const pathJoin = (path1, path2 = "") => path.join(__dirname, path1, path2)
+const pathJoin = (path1: string, path2 = '') => path.join(__dirname, path1, path2)
 // Абсолютный путь
-const pathResolve = (path1, path2 = "") => path.resolve(__dirname, path1, path2)
+const pathResolve = (path1: string, path2 = '') => path.resolve(__dirname, path1, path2)
 // Плагины, для просмотра оптимизаций
 const plugins = () => {
     const base = [
@@ -60,12 +62,11 @@ const plugins = () => {
             template: pathJoin('src', 'index.html'),
             // для минимизации html в одну строку
             minify: {
-                collapseWhitespace: isPord
+                collapseWhitespace: isPord,
+                removeComments: true,
+                removeRedundantAttributes: true,
+                useShortDoctype: true
             }
-        }),
-        // следить за файломи
-        new TslintWebpackPlugin({
-            files: ['./src/**/*.ts']
         }),
         // чтобы собрать в один файл вендора, и разделить по чанком @import
         new MiniCssExtractPlugin({
@@ -78,27 +79,44 @@ const plugins = () => {
                 {
                     from: pathResolve('src/favicon.ico'),
                     to: pathResolve('dist')
-                }
+                },
+                // {
+                //     from: 'src/assets/**/*',
+                //     to: './assets',
+                //     transformPath(targetPath, absolutePath) {
+                //         return targetPath.replace('src/assets', '');
+                //     }
+                // }
             ]
-        })
+        }),
     ]
+    if (isDev) {
+        const options: Options = {
+            extensions: ['ts', 'tsx'],
+            failOnError: true,
+            
+        }
+        base.push(new ESLintPlugin(options))
+    }
     if (isPord) {
-        base.push(new BundleAnalyzerPlugin)
+        base.push(new BundleAnalyzerPlugin())
     }
     return base
 }
 
-module.exports = {
+
+
+const config: webpack.Configuration = {
     // корень проект, откуда начинается файлы
     context: pathJoin('src'),
     // prod или dev
-    mode: process.env.NODE_ENV,
+    mode: mode,
     entry: {
         // точка сброки проекта
         app: pathJoin('src', 'index.tsx')
     },
     // Просмотривать исходный код без компилятора 
-    devtool: isDev ? 'source-map' : '',
+    devtool: isDev ? 'source-map' : false,
     devServer: {
         // Точка слежки
         contentBase: pathResolve('src'),
@@ -122,7 +140,7 @@ module.exports = {
         // 
         compress: true,
         // адрес проекта
-        host: 'localhost'
+        host: HOST
     },
     // Для указания что за проект
     target: 'web',
@@ -201,3 +219,5 @@ module.exports = {
     // плагины
     plugins: plugins()
 }
+
+export default config

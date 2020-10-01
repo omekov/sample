@@ -30,7 +30,7 @@ const SignUp = () => (
             </Segment>
         </Form>
         <Message>
-            Если раньше были у нас можете <Link to="/signin">Авторизоваться</Link>
+            Если раньше были у нас можете <Link to='/signin'>Авторизоваться</Link>
         </Message>
     </PageSingleWrapper>
 )
