@@ -21,7 +21,7 @@ const SignIn = () => (
             </Segment>
         </Form>
         <Message>
-            Если вы первые у нас советуем пройти <Link to="/signup">Регистрацию</Link>
+            Если вы первые у нас советуем пройти <Link to='/signup'>Регистрацию</Link>
         </Message>
     </PageSingleWrapper>
 )

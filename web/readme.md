@@ -15,7 +15,7 @@ https://habr.com/ru/company/constanta/blog/428800/
 - npm init
 Определиться стэками 
 - npm install
-Настроит webpack, tsconfig, tslint
+Настроит webpack, tsconfig, eslint
 - npm 
 
 Осталось
@@ -31,7 +31,7 @@ theme
 - O Webpack
 - O React
 - O Semantic UI
-- O TSLint
+- O ESLint
 - O React Router
 - O Formik
 - O Архектура проекта
