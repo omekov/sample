@@ -27,9 +27,9 @@ func (s *Server) signIn(w http.ResponseWriter, r *http.Request) {
 		s.error(w, r, http.StatusBadRequest, err)
 		return
 	}
-	token, err := s.Store.Customers.SignIn(r.Context(), auth)
+	token, err := s.Store.Customer.FindCustomer(r.Context(), auth)
 	if err != nil {
-		s.error(w, r, http.StatusInternalServerError, err)
+		s.error(w, r, http.StatusUnauthorized, err)
 		return
 	}
 	s.respond(w, r, http.StatusOK, token)
@@ -56,7 +56,7 @@ func (s *Server) signUp(w http.ResponseWriter, r *http.Request) {
 		s.error(w, r, http.StatusBadRequest, err)
 		return
 	}
-	if err := s.Store.Customers.SignUp(r.Context(), customer); err != nil {
+	if err := s.Store.Customer.CreateCustomer(r.Context(), customer); err != nil {
 		s.error(w, r, http.StatusInternalServerError, err)
 		return
 	}

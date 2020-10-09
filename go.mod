@@ -13,6 +13,7 @@ require (
 	github.com/joho/godotenv v1.3.0
 	github.com/klauspost/compress v1.10.11 // indirect
 	github.com/mailru/easyjson v0.7.6 // indirect
+	github.com/micro/go-micro/v2 v2.9.1
 	github.com/sirupsen/logrus v1.6.0
 	github.com/stretchr/objx v0.3.0 // indirect
 	github.com/swaggo/http-swagger v0.0.0-20200308142732-58ac5e232fba

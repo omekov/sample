@@ -47,9 +47,9 @@ func (s *Server) authenticateUser(next http.Handler) http.Handler {
 			s.error(w, r, http.StatusForbidden, errNotAuthenticated)
 			return
 		}
-		u, err := s.Store.Customers.WhoAmi(r.Context(), splitted)
+		u, err := s.Store.Customer.Customer(r.Context(), splitted)
 		if err != nil {
-			s.error(w, r, http.StatusForbidden, err)
+			s.error(w, r, http.StatusUnauthorized, err)
 			return
 		}
 
@@ -96,5 +96,17 @@ func (s *Server) respond(w http.ResponseWriter, r *http.Request, code int, data 
 
 // error - Обработка ошибочного ответа
 func (s *Server) error(w http.ResponseWriter, r *http.Request, code int, err error) {
-	s.respond(w, r, code, models.Error{Error: err.Error()})
+	logger := s.Logger.WithFields(logrus.Fields{
+		"remote_addr": r.RemoteAddr,
+		"request_id":  r.Context().Value(ctxKeyRequestID),
+	})
+	logger.Infof(
+		"error text: %s",
+		err.Error(),
+	)
+	if code == http.StatusUnauthorized {
+		s.respond(w, r, code, models.Error{Error: errIncorrectEmailPassword.Error()})
+	} else {
+		s.respond(w, r, code, models.Error{Error: err.Error()})
+	}
 }

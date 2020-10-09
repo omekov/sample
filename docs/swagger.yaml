@@ -8,11 +8,16 @@ definitions:
     type: object
   models.Customer:
     properties:
+      actived:
+        example: false
+        type: boolean
       blocked:
         example: false
         type: boolean
       firstname:
         example: Adam
+        type: string
+      id:
         type: string
       password:
         example: "123456"

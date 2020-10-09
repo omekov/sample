@@ -217,6 +217,10 @@
         "models.Customer": {
             "type": "object",
             "properties": {
+                "actived": {
+                    "type": "boolean",
+                    "example": false
+                },
                 "blocked": {
                     "type": "boolean",
                     "example": false
@@ -224,6 +228,9 @@
                 "firstname": {
                     "type": "string",
                     "example": "Adam"
+                },
+                "id": {
+                    "type": "string"
                 },
                 "password": {
                     "type": "string",

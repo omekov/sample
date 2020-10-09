@@ -4,14 +4,14 @@ import (
 	"context"
 	"time"
 
-	"github.com/omekov/sample/internal/apiserver/stores/customers"
+	"github.com/omekov/sample/internal/apiserver/stores/mongos"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 // Store ...
 type Store struct {
-	Customers customers.Customer
+	Customer mongos.Customer
 }
 
 // ConfigureStore ...

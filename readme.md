@@ -7,6 +7,7 @@ https://www.mongodb.com/blog/post/quick-start-golang--mongodb--how-to-create-doc
 https://medium.com/better-programming/unit-testing-code-using-the-mongo-go-driver-in-golang-7166d1aa72c0
 https://medium.com/@jcox250/password-hash-salt-using-golang-b041dc94cb72
 
+
 Это проект относить второму знакомству моего прохождения с golang. Повысить практику и писать и писать код.
 
 Первая - это была онлайн маркет возможность легко интегривать разные магазины на мой проект. Но потерял не много интерес.Но постараюсь найти этот толчок и доделать.
@@ -25,7 +26,8 @@ https://medium.com/@jcox250/password-hash-salt-using-golang-b041dc94cb72
 
 Первая задача:
 - Проект должен запускатся через докер | Done
-- Проект должен подключатся через докер на образ бд mongodb | Done
+- Проект должна быть возможность подключатся на бд mongodb, через докер образ или mlab  | Done
+- Проект должна быть возможность подключатся на cash redis, через докер образ или ...  | Done
 - Проекте должено использоваться swagger | Done
 
 Вторая задача:

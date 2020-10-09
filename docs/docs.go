@@ -232,6 +232,10 @@ var doc = `{
         "models.Customer": {
             "type": "object",
             "properties": {
+                "actived": {
+                    "type": "boolean",
+                    "example": false
+                },
                 "blocked": {
                     "type": "boolean",
                     "example": false
@@ -239,6 +243,9 @@ var doc = `{
                 "firstname": {
                     "type": "string",
                     "example": "Adam"
+                },
+                "id": {
+                    "type": "string"
                 },
                 "password": {
                     "type": "string",
