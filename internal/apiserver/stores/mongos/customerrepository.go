@@ -11,16 +11,30 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-// Customer ...
-type Customer struct {
+type customer struct {
 	DB     Database
 	Helper helpers.Config
 }
 
 const collectionName = "customers"
 
+// CustomerRepository ...
+type CustomerRepository interface {
+	FindCustomer(context.Context, *models.Auth) (string, error)
+	CreateCustomer(context.Context, *models.Customer) error
+	Customer(context.Context, []string) (*models.Claims, error)
+}
+
+// NewUserDatabase ...
+func NewCustomerRepository(db Database, conf helpers.Config) CustomerRepository {
+	return &customer{
+		DB:     db,
+		Helper: conf,
+	}
+}
+
 // FindCustomer ...
-func (c *Customer) FindCustomer(ctx context.Context, auth *models.SignInput) (string, error) {
+func (c *customer) FindCustomer(ctx context.Context, auth *models.Auth) (string, error) {
 	var customer models.Customer
 	err := c.DB.Collection(collectionName).FindOne(ctx, bson.D{
 		{Key: "username", Value: auth.Username},
@@ -44,7 +58,7 @@ func (c *Customer) FindCustomer(ctx context.Context, auth *models.SignInput) (st
 }
 
 // CreateCustomer ...
-func (c *Customer) CreateCustomer(ctx context.Context, customer *models.Customer) error {
+func (c *customer) CreateCustomer(ctx context.Context, customer *models.Customer) error {
 	err := c.DB.Collection(collectionName).FindOne(ctx, bson.D{
 		{Key: "username", Value: customer.Username},
 	}).Decode(&customer)
@@ -70,7 +84,7 @@ func (c *Customer) CreateCustomer(ctx context.Context, customer *models.Customer
 }
 
 // Customer ...
-func (c *Customer) Customer(ctx context.Context, splitted []string) (*models.Claims, error) {
+func (c *customer) Customer(ctx context.Context, splitted []string) (*models.Claims, error) {
 	tokenPart := splitted[1]
 	claims := models.Claims{}
 	token, err := c.Helper.ParseToken(tokenPart, &claims)

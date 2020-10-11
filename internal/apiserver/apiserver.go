@@ -74,8 +74,8 @@ func Run() {
 	}
 }
 
-// getConfig ...
-func getConfig() *models.MongoConfig {
+// GetConfig ...
+func GetConfig() *models.MongoConfig {
 	return &models.MongoConfig{
 		Username:     IsReadyENV(MONGOUSERNAME),
 		Password:     IsReadyENV(MONGOPASSWORD),
@@ -86,24 +86,25 @@ func getConfig() *models.MongoConfig {
 
 func newServer() error {
 	FlagAndLoadENV()
-	dbClient, err := mongos.NewClient(getConfig())
+	dbClient, err := mongos.NewClient(GetConfig())
 	if err != nil {
 		return err
 	}
 	if err = dbClient.Connect(); err != nil {
 		return err
 	}
-	db := mongos.NewDatabase(getConfig(), dbClient)
+	db := mongos.NewDatabase(GetConfig(), dbClient)
+	customer := mongos.NewCustomerRepository(
+		db,
+		helpers.Config{
+			TokenSecret: []byte(IsReadyENV(TOKENSECRET)),
+		},
+	)
 	server := handlers.Server{
 		Router: mux.NewRouter(),
 		Logger: logrus.New(),
 		Store: &stores.Store{
-			Customer: mongos.Customer{
-				DB: db,
-				Helper: helpers.Config{
-					TokenSecret: []byte(IsReadyENV(TOKENSECRET)),
-				},
-			},
+			Customer: customer,
 		},
 	}
 	server.ConfigureRouter(IsReadyENV(PORT))

@@ -22,7 +22,7 @@ import (
 // @Failure 500 {object} models.Error
 // @Router /signin [post]
 func (s *Server) signIn(w http.ResponseWriter, r *http.Request) {
-	var auth *models.SignInput
+	var auth *models.Auth
 	if err := json.NewDecoder(r.Body).Decode(&auth); err != nil {
 		s.error(w, r, http.StatusBadRequest, err)
 		return

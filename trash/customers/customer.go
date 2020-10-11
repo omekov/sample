@@ -16,7 +16,7 @@ type Customer struct {
 }
 
 // SignIn ...
-func (c *Customer) SignIn(ctx context.Context, auth *models.SignInput) (string, error) {
+func (c *Customer) SignIn(ctx context.Context, auth *models.Auth) (string, error) {
 	customer, _, err := c.findByUsername(ctx, auth.Username)
 	if err != nil {
 		return "", err

@@ -5,7 +5,9 @@ import (
 	"testing"
 
 	"github.com/joho/godotenv"
+	"github.com/omekov/sample/internal/apiserver"
 	api "github.com/omekov/sample/internal/apiserver"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestApp_ENV(t *testing.T) {
@@ -26,4 +28,12 @@ func TestApp_ENV(t *testing.T) {
 			t.Errorf("is not ENV - %s", e)
 		}
 	}
+}
+
+func TestGetConfig(t *testing.T) {
+	if err := godotenv.Load(); err != nil {
+		log.Fatal("Error loading .env file ", err)
+	}
+	conf := apiserver.GetConfig()
+	assert.NotEmpty(t, conf)
 }

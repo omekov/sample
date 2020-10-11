@@ -12,7 +12,7 @@ type Config struct {
 	TokenSecret []byte
 }
 
-func (c *Config) GenerateJWT(customer *models.Customer, auth *models.SignInput) (string, error) {
+func (c *Config) GenerateJWT(customer *models.Customer, auth *models.Auth) (string, error) {
 	if err := bcrypt.CompareHashAndPassword([]byte(customer.Password), []byte(auth.Password)); err != nil {
 		return "", err
 	}

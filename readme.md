@@ -64,3 +64,7 @@ https://sample.azamat.dev
 
 Требование проекту:
 - Максимально упращать код и понимания
+
+
+
+https://github.com/b-pagis/medium-mongo-go-driver/blob/master/databases/database_test.go

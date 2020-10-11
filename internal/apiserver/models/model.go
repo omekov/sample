@@ -21,8 +21,8 @@ type Claims struct {
 	jwt.StandardClaims
 }
 
-// SignInput ...
-type SignInput struct {
+// Auth ...
+type Auth struct {
 	Username string `json:"username,omitempty" example:"example@gmail.com"`
 	Password string `json:"password,omitempty" example:"123456"`
 }
