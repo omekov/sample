@@ -9,8 +9,8 @@ import (
 	"github.com/omekov/sample/internal/apiserver/handlers"
 	"github.com/omekov/sample/internal/apiserver/models"
 	"github.com/omekov/sample/internal/apiserver/stores"
-	"github.com/omekov/sample/internal/apiserver/stores/helpers"
 	"github.com/omekov/sample/internal/apiserver/stores/mongos"
+	"github.com/omekov/sample/internal/apiserver/stores/mongos/customer"
 
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
@@ -79,7 +79,7 @@ func GetConfig() *models.MongoConfig {
 	return &models.MongoConfig{
 		Username:     IsReadyENV(MONGOUSERNAME),
 		Password:     IsReadyENV(MONGOPASSWORD),
-		Url:          IsReadyENV(MONGOURI),
+		URL:          IsReadyENV(MONGOURI),
 		DatabaseName: IsReadyENV(MONGONAME),
 	}
 }
@@ -94,11 +94,9 @@ func newServer() error {
 		return err
 	}
 	db := mongos.NewDatabase(GetConfig(), dbClient)
-	customer := mongos.NewCustomerRepository(
+	customer := customer.NewCustomerRepository(
 		db,
-		helpers.Config{
-			TokenSecret: []byte(IsReadyENV(TOKENSECRET)),
-		},
+		"customers",
 	)
 	server := handlers.Server{
 		Router: mux.NewRouter(),
@@ -106,6 +104,7 @@ func newServer() error {
 		Store: &stores.Store{
 			Customer: customer,
 		},
+		TokenSecret: []byte(IsReadyENV(TOKENSECRET)),
 	}
 	server.ConfigureRouter(IsReadyENV(PORT))
 	return nil

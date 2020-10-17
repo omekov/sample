@@ -1,32 +1,15 @@
 basePath: /
 definitions:
-  models.Claims:
-    properties:
-      customer:
-        $ref: '#/definitions/models.Customer'
-        type: object
-    type: object
   models.Customer:
     properties:
-      actived:
-        example: false
-        type: boolean
-      blocked:
-        example: false
-        type: boolean
       firstname:
         example: Adam
-        type: string
-      id:
         type: string
       password:
         example: "123456"
         type: string
-      registrationDate:
-        example: "2020-09-09T21:21:46+00:00"
-        type: string
-      releaseDate:
-        example: "2020-09-09T22:21:46+00:00"
+      repeatPassword:
+        example: "123456"
         type: string
       username:
         example: example@gmail.com
@@ -36,15 +19,6 @@ definitions:
     properties:
       error:
         example: error
-        type: string
-    type: object
-  models.SignInput:
-    properties:
-      password:
-        example: "123456"
-        type: string
-      username:
-        example: example@gmail.com
         type: string
     type: object
 host: localhost:9090
@@ -60,18 +34,58 @@ info:
   title: Sample API
   version: "2.0"
 paths:
-  /api/whoami:
-    get:
+  /api/refresh:
+    post:
       consumes:
       - application/json
-      description: whoami input header Authorization Bearer <token>, return parse in Claims
+      description: whoami input header Authorization Bearer <token>, return refresh
+        in Claims
       produces:
       - application/json
       responses:
         "200":
-          description: OK
+          description: token
           schema:
-            $ref: '#/definitions/models.Claims'
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Error'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Error'
+      security:
+      - ApiKeyAuth: []
+      summary: Refresh token
+      tags:
+      - sign
+  /api/whoami:
+    get:
+      consumes:
+      - application/json
+      description: whoami input header Authorization Bearer <token>, return parse
+        in Claims
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 'Customer":{"username": "example@gmail.com", "firstname": "Adam"
+            },"exp": 1602666876}'
+          schema:
+            type: string
         "400":
           description: Bad Request
           schema:
@@ -108,14 +122,14 @@ paths:
         name: signin
         required: true
         schema:
-          $ref: '#/definitions/models.SignInput'
+          $ref: '#/definitions/models.Customer'
       produces:
       - application/json
       responses:
         "200":
-          description: OK
+          description: qwerty
           schema:
-            $ref: '#/definitions/models.SignInput'
+            type: string
         "400":
           description: Bad Request
           schema:

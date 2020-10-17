@@ -3,8 +3,11 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+	"time"
+	"strings"
 
 	"github.com/omekov/sample/internal/apiserver/models"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 // signIn godoc
@@ -13,8 +16,8 @@ import (
 // @Tags sign
 // @Accept  json
 // @Produce  json
-// @Param signin body models.SignInput true "SignIn auth"
-// @Success 200 {object} models.SignInput
+// @Param signin body models.Customer true "SignIn auth"
+// @Success 200 {string} Token "qwerty"
 // @Failure 400 {object} models.Error
 // @Failure 401 {object} models.Error
 // @Failure 403 {object} models.Error
@@ -22,15 +25,36 @@ import (
 // @Failure 500 {object} models.Error
 // @Router /signin [post]
 func (s *Server) signIn(w http.ResponseWriter, r *http.Request) {
-	var auth *models.Auth
-	if err := json.NewDecoder(r.Body).Decode(&auth); err != nil {
+	var customer *models.Customer
+	if err := json.NewDecoder(r.Body).Decode(&customer); err != nil {
 		s.error(w, r, http.StatusBadRequest, err)
 		return
 	}
-	token, err := s.Store.Customer.FindCustomer(r.Context(), auth)
-	if err != nil {
+	pass := customer.Password
+	err := s.Store.Customer.FindCustomer(r.Context(), customer)
+	if err != nil  {
 		s.error(w, r, http.StatusUnauthorized, err)
 		return
+	}
+	err = customer.ComparePassword(pass) 
+	if err != nil  {
+		s.error(w, r, http.StatusUnauthorized, err)
+		return
+	}
+	updateRealseDate := bson.D{
+		{
+			Key: "$set",
+			Value: bson.D{
+				{Key: "releasedate", Value: time.Now()},
+			},
+		},
+	}
+	if err := s.Store.Customer.UpdateCustomer(r.Context(), customer, updateRealseDate); err != nil {
+		s.error(w, r, http.StatusInternalServerError, err)
+	}
+	token, err := customer.GenerateJWT(customer, s.TokenSecret)
+	if err != nil {
+		s.error(w, r, http.StatusInternalServerError, err)
 	}
 	s.respond(w, r, http.StatusOK, token)
 	return
@@ -70,7 +94,8 @@ func (s *Server) signUp(w http.ResponseWriter, r *http.Request) {
 // @Tags sign
 // @Accept  json
 // @Produce  json
-// @Success 200 {object} models.Claims
+// @Header 200 {string} Authorization "Bearer token"
+// @Success 200 {string} string {"Customer":{"username": "example@gmail.com", "firstname": "Adam" },"exp": 1602666876}
 // @Failure 400 {object} models.Error
 // @Failure 401 {object} models.Error
 // @Failure 403 {object} models.Error
@@ -84,6 +109,37 @@ func (s *Server) whoami() http.HandlerFunc {
 	}
 }
 
+// whoami godoc
+// @Summary Refresh token
+// @Description whoami input header Authorization Bearer <token>, return refresh in Claims
+// @Tags sign
+// @Accept  json
+// @Produce  json
+// @Success 200 {string} string "token"
+// @Failure 400 {object} models.Error
+// @Failure 401 {object} models.Error
+// @Failure 403 {object} models.Error
+// @Failure 404 {object} models.Error
+// @Failure 500 {object} models.Error
+// @Security ApiKeyAuth
+// @Router /api/refresh [post]
+func (s *Server) refreshToken() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		tokenHeader := r.Header.Get("Authorization")
+		if tokenHeader == "" {
+			s.error(w, r, http.StatusUnauthorized, errNotAuthenticated)
+			return
+		}
+		splitted := strings.Split(tokenHeader, " ")
+		var c models.Customer
+		token, err := c.RefreshToken(splitted[1], s.TokenSecret)
+		if err != nil {
+			s.error(w, r, http.StatusUnauthorized, err)
+			return
+		}
+		s.respond(w, r, http.StatusOK, token)
+	}
+}
 /*
 
 // getOrder godoc

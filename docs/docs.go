@@ -32,6 +32,64 @@ var doc = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/refresh": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "whoami input header Authorization Bearer \u003ctoken\u003e, return refresh in Claims",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sign"
+                ],
+                "summary": "Refresh token",
+                "responses": {
+                    "200": {
+                        "description": "token",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    }
+                }
+            }
+        },
         "/api/whoami": {
             "get": {
                 "security": [
@@ -52,9 +110,9 @@ var doc = `{
                 "summary": "Parse token",
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "Customer\":{\"username\": \"example@gmail.com\", \"firstname\": \"Adam\" },\"exp\": 1602666876}",
                         "schema": {
-                            "$ref": "#/definitions/models.Claims"
+                            "type": "string"
                         }
                     },
                     "400": {
@@ -110,15 +168,15 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.SignInput"
+                            "$ref": "#/definitions/models.Customer"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "qwerty",
                         "schema": {
-                            "$ref": "#/definitions/models.SignInput"
+                            "type": "string"
                         }
                     },
                     "400": {
@@ -220,44 +278,20 @@ var doc = `{
         }
     },
     "definitions": {
-        "models.Claims": {
-            "type": "object",
-            "properties": {
-                "customer": {
-                    "type": "object",
-                    "$ref": "#/definitions/models.Customer"
-                }
-            }
-        },
         "models.Customer": {
             "type": "object",
             "properties": {
-                "actived": {
-                    "type": "boolean",
-                    "example": false
-                },
-                "blocked": {
-                    "type": "boolean",
-                    "example": false
-                },
                 "firstname": {
                     "type": "string",
                     "example": "Adam"
-                },
-                "id": {
-                    "type": "string"
                 },
                 "password": {
                     "type": "string",
                     "example": "123456"
                 },
-                "registrationDate": {
+                "repeatPassword": {
                     "type": "string",
-                    "example": "2020-09-09T21:21:46+00:00"
-                },
-                "releaseDate": {
-                    "type": "string",
-                    "example": "2020-09-09T22:21:46+00:00"
+                    "example": "123456"
                 },
                 "username": {
                     "type": "string",
@@ -271,19 +305,6 @@ var doc = `{
                 "error": {
                     "type": "string",
                     "example": "error"
-                }
-            }
-        },
-        "models.SignInput": {
-            "type": "object",
-            "properties": {
-                "password": {
-                    "type": "string",
-                    "example": "123456"
-                },
-                "username": {
-                    "type": "string",
-                    "example": "example@gmail.com"
                 }
             }
         }

@@ -18,6 +18,7 @@ type Server struct {
 	Router *mux.Router
 	Logger *logrus.Logger
 	Store  *stores.Store
+	TokenSecret []byte
 }
 
 // ConfigureRouter ...
@@ -29,7 +30,8 @@ func (s *Server) ConfigureRouter(PORT string) *mux.Router {
 	s.Router.HandleFunc("/signup", s.signUp).Methods(http.MethodPost)
 	private := s.Router.PathPrefix("/api").Subrouter()
 	private.Use(s.authenticateUser)
-	private.HandleFunc("/whoami", s.whoami()).Methods("GET")
+	private.HandleFunc("/whoami", s.whoami()).Methods(http.MethodGet)
+	private.HandleFunc("/refresh", s.refreshToken()).Methods(http.MethodPost)
 
 	// Swagger
 	s.Router.PathPrefix("/swagger").Handler(httpSwagger.WrapHandler)

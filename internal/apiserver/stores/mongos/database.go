@@ -7,7 +7,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"gopkg.in/mgo.v2/bson"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 // Database ...
@@ -61,7 +61,7 @@ func NewClient(cnf *models.MongoConfig) (Client, error) {
 			Username:   cnf.Username,
 			Password:   cnf.Password,
 			AuthSource: cnf.DatabaseName,
-		}).ApplyURI(cnf.Url).SetRetryWrites(false)
+		}).ApplyURI(cnf.URL).SetRetryWrites(false)
 	c, err := mongo.NewClient(clientOptions)
 	return &mongoClient{cl: c}, err
 

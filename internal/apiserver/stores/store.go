@@ -1,10 +1,10 @@
 package stores
 
 import (
-	"github.com/omekov/sample/internal/apiserver/stores/mongos"
+	"github.com/omekov/sample/internal/apiserver/stores/mongos/customer"
 )
 
 // Store ...
 type Store struct {
-	Customer mongos.CustomerRepository
+	Customer customer.CustomerRepository
 }

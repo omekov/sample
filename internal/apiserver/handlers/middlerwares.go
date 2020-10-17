@@ -47,12 +47,12 @@ func (s *Server) authenticateUser(next http.Handler) http.Handler {
 			s.error(w, r, http.StatusForbidden, errNotAuthenticated)
 			return
 		}
-		u, err := s.Store.Customer.Customer(r.Context(), splitted)
+		var customer models.Customer
+		u, err := customer.Customer(splitted, s.TokenSecret)
 		if err != nil {
 			s.error(w, r, http.StatusUnauthorized, err)
 			return
 		}
-
 		next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), ctxKeyUser, u)))
 	})
 }
@@ -100,10 +100,7 @@ func (s *Server) error(w http.ResponseWriter, r *http.Request, code int, err err
 		"remote_addr": r.RemoteAddr,
 		"request_id":  r.Context().Value(ctxKeyRequestID),
 	})
-	logger.Infof(
-		"error text: %s",
-		err.Error(),
-	)
+	logger.Infof("%s", err.Error())
 	if code == http.StatusUnauthorized {
 		s.respond(w, r, code, models.Error{Error: errIncorrectEmailPassword.Error()})
 	} else {
