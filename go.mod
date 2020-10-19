@@ -4,17 +4,17 @@ go 1.13
 
 require (
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
-	github.com/aws/aws-sdk-go v1.34.17
+	github.com/aws/aws-sdk-go v1.34.17 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-openapi/spec v0.19.9 // indirect
 	github.com/go-ozzo/ozzo-validation v3.6.0+incompatible
-	github.com/go-swagger/go-swagger v0.25.0
+	github.com/go-swagger/go-swagger v0.25.0 // indirect
 	github.com/google/uuid v1.1.2
 	github.com/gorilla/mux v1.8.0
 	github.com/joho/godotenv v1.3.0
 	github.com/klauspost/compress v1.10.11 // indirect
 	github.com/mailru/easyjson v0.7.6 // indirect
-	github.com/micro/go-micro/v2 v2.9.1
+	github.com/micro/go-micro/v2 v2.9.1 // indirect
 	github.com/sirupsen/logrus v1.6.0
 	github.com/stretchr/objx v0.3.0 // indirect
 	github.com/stretchr/testify v1.6.1
@@ -25,6 +25,6 @@ require (
 	golang.org/x/crypto v0.0.0-20200820211705-5c72a883971a
 	golang.org/x/net v0.0.0-20201010224723-4f7140c49acb // indirect
 	golang.org/x/tools v0.0.0-20201011145850-ed2f50202694 // indirect
-	gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22
-	honnef.co/go/tools v0.0.1-2019.2.3
+	gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22 // indirect
+	honnef.co/go/tools v0.0.1-2019.2.3 // indirect
 )
