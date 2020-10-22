@@ -168,15 +168,15 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.Customer"
+                            "$ref": "#/definitions/models.Credential"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "qwerty",
+                        "description": "OK",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/models.Token"
                         }
                     },
                     "400": {
@@ -238,9 +238,9 @@ var doc = `{
                 ],
                 "responses": {
                     "201": {
-                        "description": "Created",
+                        "description": "ok",
                         "schema": {
-                            "$ref": "#/definitions/models.Customer"
+                            "type": "string"
                         }
                     },
                     "400": {
@@ -278,6 +278,19 @@ var doc = `{
         }
     },
     "definitions": {
+        "models.Credential": {
+            "type": "object",
+            "properties": {
+                "password": {
+                    "type": "string",
+                    "example": "-"
+                },
+                "username": {
+                    "type": "string",
+                    "example": "example@gmail.com"
+                }
+            }
+        },
         "models.Customer": {
             "type": "object",
             "properties": {
@@ -287,11 +300,11 @@ var doc = `{
                 },
                 "password": {
                     "type": "string",
-                    "example": "123456"
+                    "example": "-"
                 },
                 "repeatPassword": {
                     "type": "string",
-                    "example": "123456"
+                    "example": "-"
                 },
                 "username": {
                     "type": "string",
@@ -305,6 +318,19 @@ var doc = `{
                 "error": {
                     "type": "string",
                     "example": "error"
+                }
+            }
+        },
+        "models.Token": {
+            "type": "object",
+            "properties": {
+                "accessToken": {
+                    "type": "string",
+                    "example": "jwt-token"
+                },
+                "refreshToken": {
+                    "type": "string",
+                    "example": "jwt-token"
                 }
             }
         }

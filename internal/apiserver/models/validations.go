@@ -7,15 +7,14 @@ func requiredIf(cond bool) validation.RuleFunc {
 		if cond {
 			return validation.Validate(value, validation.Required)
 		}
-
 		return nil
 	}
 }
 
 func repeatPassword(pass string, repeatPass string) validation.RuleFunc {
-	return func (value interface{}) error {
-		if pass == repeatPass {
-			return validation.Validate(value,  validation.Required)
+	return func(value interface{}) error {
+		if pass != repeatPass {
+			return validation.Validate(value, validation.Required)
 		}
 		return nil
 	}

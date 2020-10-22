@@ -47,8 +47,8 @@ func (s *Server) authenticateUser(next http.Handler) http.Handler {
 			s.error(w, r, http.StatusForbidden, errNotAuthenticated)
 			return
 		}
-		var customer models.Customer
-		u, err := customer.Customer(splitted, s.TokenSecret)
+
+		u, err := s.Store.JWT.Claims(splitted[1])
 		if err != nil {
 			s.error(w, r, http.StatusUnauthorized, err)
 			return

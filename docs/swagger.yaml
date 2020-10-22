@@ -1,15 +1,24 @@
 basePath: /
 definitions:
+  models.Credential:
+    properties:
+      password:
+        example: '-'
+        type: string
+      username:
+        example: example@gmail.com
+        type: string
+    type: object
   models.Customer:
     properties:
       firstname:
         example: Adam
         type: string
       password:
-        example: "123456"
+        example: '-'
         type: string
       repeatPassword:
-        example: "123456"
+        example: '-'
         type: string
       username:
         example: example@gmail.com
@@ -19,6 +28,15 @@ definitions:
     properties:
       error:
         example: error
+        type: string
+    type: object
+  models.Token:
+    properties:
+      accessToken:
+        example: jwt-token
+        type: string
+      refreshToken:
+        example: jwt-token
         type: string
     type: object
 host: localhost:9090
@@ -122,14 +140,14 @@ paths:
         name: signin
         required: true
         schema:
-          $ref: '#/definitions/models.Customer'
+          $ref: '#/definitions/models.Credential'
       produces:
       - application/json
       responses:
         "200":
-          description: qwerty
+          description: OK
           schema:
-            type: string
+            $ref: '#/definitions/models.Token'
         "400":
           description: Bad Request
           schema:
@@ -169,9 +187,9 @@ paths:
       - application/json
       responses:
         "201":
-          description: Created
+          description: ok
           schema:
-            $ref: '#/definitions/models.Customer'
+            type: string
         "400":
           description: Bad Request
           schema:

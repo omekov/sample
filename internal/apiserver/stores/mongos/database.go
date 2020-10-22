@@ -4,10 +4,10 @@ import (
 	"context"
 
 	"github.com/omekov/sample/internal/apiserver/models"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"go.mongodb.org/mongo-driver/bson"
 )
 
 // Database ...
@@ -19,6 +19,7 @@ type Database interface {
 // Collection ...
 type Collection interface {
 	FindOne(context.Context, interface{}) SingleResult
+	FindOneAndUpdate(context.Context, interface{}, interface{}) SingleResult
 	InsertOne(context.Context, interface{}) (*mongo.InsertOneResult, error)
 	DeleteOne(ctx context.Context, filter interface{}) (int64, error)
 	UpdateOne(ctx context.Context, id primitive.ObjectID, update interface{}) (*mongo.UpdateResult, error)
@@ -117,6 +118,11 @@ func (mc *mongoCollection) InsertOne(ctx context.Context, document interface{}) 
 func (mc *mongoCollection) DeleteOne(ctx context.Context, filter interface{}) (int64, error) {
 	count, err := mc.coll.DeleteOne(ctx, filter)
 	return count.DeletedCount, err
+}
+
+func (mc *mongoCollection) FindOneAndUpdate(ctx context.Context, filter interface{}, update interface{}) SingleResult {
+	singleResult := mc.coll.FindOneAndUpdate(ctx, filter, update)
+	return &mongoSingleResult{sr: singleResult}
 }
 
 func (sr *mongoSingleResult) Decode(v interface{}) error {

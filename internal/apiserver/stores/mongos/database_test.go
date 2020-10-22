@@ -1,10 +1,10 @@
 package mongos_test
 
 import (
-	"os"
-	"regexp"
 	"errors"
 	"log"
+	"os"
+	"regexp"
 	"testing"
 
 	"github.com/joho/godotenv"

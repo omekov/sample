@@ -18,7 +18,6 @@ type Server struct {
 	Router *mux.Router
 	Logger *logrus.Logger
 	Store  *stores.Store
-	TokenSecret []byte
 }
 
 // ConfigureRouter ...

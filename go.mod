@@ -8,6 +8,8 @@ require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-openapi/spec v0.19.9 // indirect
 	github.com/go-ozzo/ozzo-validation v3.6.0+incompatible
+	github.com/go-redis/redis v6.15.9+incompatible
+	github.com/go-redis/redis/v8 v8.3.2
 	github.com/go-swagger/go-swagger v0.25.0 // indirect
 	github.com/google/uuid v1.1.2
 	github.com/gorilla/mux v1.8.0

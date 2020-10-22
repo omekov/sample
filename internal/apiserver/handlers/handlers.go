@@ -3,11 +3,11 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
-	"time"
 	"strings"
+	"time"
 
 	"github.com/omekov/sample/internal/apiserver/models"
-	"go.mongodb.org/mongo-driver/bson"
+	"github.com/omekov/sample/internal/apiserver/stores/jwt"
 )
 
 // signIn godoc
@@ -16,8 +16,8 @@ import (
 // @Tags sign
 // @Accept  json
 // @Produce  json
-// @Param signin body models.Customer true "SignIn auth"
-// @Success 200 {string} Token "qwerty"
+// @Param signin body models.Credential true "SignIn auth"
+// @Success 200 {object} models.Token
 // @Failure 400 {object} models.Error
 // @Failure 401 {object} models.Error
 // @Failure 403 {object} models.Error
@@ -25,38 +25,43 @@ import (
 // @Failure 500 {object} models.Error
 // @Router /signin [post]
 func (s *Server) signIn(w http.ResponseWriter, r *http.Request) {
-	var customer *models.Customer
-	if err := json.NewDecoder(r.Body).Decode(&customer); err != nil {
+	var credential *models.Credential
+	if err := json.NewDecoder(r.Body).Decode(&credential); err != nil {
 		s.error(w, r, http.StatusBadRequest, err)
 		return
 	}
-	pass := customer.Password
-	err := s.Store.Customer.FindCustomer(r.Context(), customer)
-	if err != nil  {
+	customer := &models.Customer{
+		Username:    credential.Username,
+		ReleaseDate: time.Now(),
+	}
+	err := s.Store.Customer.FindAndUpdate(r.Context(), customer)
+	if err != nil {
 		s.error(w, r, http.StatusUnauthorized, err)
 		return
 	}
-	err = customer.ComparePassword(pass) 
-	if err != nil  {
+	err = customer.ComparePassword(credential.Password)
+	if err != nil {
 		s.error(w, r, http.StatusUnauthorized, err)
 		return
 	}
-	updateRealseDate := bson.D{
-		{
-			Key: "$set",
-			Value: bson.D{
-				{Key: "releasedate", Value: time.Now()},
-			},
-		},
-	}
-	if err := s.Store.Customer.UpdateCustomer(r.Context(), customer, updateRealseDate); err != nil {
-		s.error(w, r, http.StatusInternalServerError, err)
-	}
-	token, err := customer.GenerateJWT(customer, s.TokenSecret)
+	accToken, err := s.Store.JWT.NewJWT(customer)
 	if err != nil {
 		s.error(w, r, http.StatusInternalServerError, err)
+		return
 	}
-	s.respond(w, r, http.StatusOK, token)
+	refToken, err := s.Store.JWT.NewJWT(customer)
+	if err != nil {
+		s.error(w, r, http.StatusInternalServerError, err)
+		return
+	}
+	if err := s.Store.Cache.SetCustomerIDAndRefreshToken(customer, refToken); err != nil {
+		s.error(w, r, http.StatusInternalServerError, err)
+		return
+	}
+	s.respond(w, r, http.StatusOK, models.Token{
+		AccessToken:  accToken,
+		Refreshtoken: refToken,
+	})
 	return
 }
 
@@ -67,7 +72,7 @@ func (s *Server) signIn(w http.ResponseWriter, r *http.Request) {
 // @Accept  json
 // @Produce  json
 // @Param signup body models.Customer true "SignUp customer"
-// @Success 201 {object} models.Customer
+// @Success 201 {string} string	"ok"
 // @Failure 400 {object} models.Error
 // @Failure 401 {object} models.Error
 // @Failure 403 {object} models.Error
@@ -80,7 +85,7 @@ func (s *Server) signUp(w http.ResponseWriter, r *http.Request) {
 		s.error(w, r, http.StatusBadRequest, err)
 		return
 	}
-	if err := s.Store.Customer.CreateCustomer(r.Context(), customer); err != nil {
+	if err := s.Store.Customer.Create(r.Context(), customer); err != nil {
 		s.error(w, r, http.StatusInternalServerError, err)
 		return
 	}
@@ -105,11 +110,11 @@ func (s *Server) signUp(w http.ResponseWriter, r *http.Request) {
 // @Router /api/whoami [get]
 func (s *Server) whoami() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		s.respond(w, r, http.StatusOK, r.Context().Value(ctxKeyUser).(*models.Claims))
+		s.respond(w, r, http.StatusOK, r.Context().Value(ctxKeyUser).(*jwt.Claims))
 	}
 }
 
-// whoami godoc
+// refresh godoc
 // @Summary Refresh token
 // @Description whoami input header Authorization Bearer <token>, return refresh in Claims
 // @Tags sign
@@ -131,8 +136,7 @@ func (s *Server) refreshToken() http.HandlerFunc {
 			return
 		}
 		splitted := strings.Split(tokenHeader, " ")
-		var c models.Customer
-		token, err := c.RefreshToken(splitted[1], s.TokenSecret)
+		token, err := s.Store.JWT.RefreshJWT(splitted[1])
 		if err != nil {
 			s.error(w, r, http.StatusUnauthorized, err)
 			return
@@ -140,6 +144,7 @@ func (s *Server) refreshToken() http.HandlerFunc {
 		s.respond(w, r, http.StatusOK, token)
 	}
 }
+
 /*
 
 // getOrder godoc
