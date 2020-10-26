@@ -52,44 +52,6 @@ info:
   title: Sample API
   version: "2.0"
 paths:
-  /api/refresh:
-    post:
-      consumes:
-      - application/json
-      description: whoami input header Authorization Bearer <token>, return refresh
-        in Claims
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: token
-          schema:
-            type: string
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/models.Error'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/models.Error'
-        "403":
-          description: Forbidden
-          schema:
-            $ref: '#/definitions/models.Error'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/models.Error'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/models.Error'
-      security:
-      - ApiKeyAuth: []
-      summary: Refresh token
-      tags:
-      - sign
   /api/whoami:
     get:
       consumes:
@@ -127,6 +89,48 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Parse token
+      tags:
+      - sign
+  /refresh:
+    post:
+      consumes:
+      - application/json
+      description: http body refreshtoken sign new refresh token
+      parameters:
+      - description: Refresh auth
+        in: body
+        name: refresh
+        required: true
+        schema:
+          $ref: '#/definitions/models.Token'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Token'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Error'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Error'
+      summary: Refresh token
       tags:
       - sign
   /signin:

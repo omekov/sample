@@ -25,12 +25,12 @@ func (s *Server) ConfigureRouter(PORT string) *mux.Router {
 	s.Router.Use(s.setRequestID)
 	s.Router.Use(mux.CORSMethodMiddleware(s.Router))
 	s.Router.Use(s.logRequest)
-	s.Router.HandleFunc("/signin", s.signIn).Methods(http.MethodPost)
-	s.Router.HandleFunc("/signup", s.signUp).Methods(http.MethodPost)
+	s.Router.HandleFunc("/signin", s.signIn()).Methods(http.MethodPost)
+	s.Router.HandleFunc("/signup", s.signUp()).Methods(http.MethodPost)
+	s.Router.HandleFunc("/refresh", s.refreshToken()).Methods(http.MethodPost)
 	private := s.Router.PathPrefix("/api").Subrouter()
 	private.Use(s.authenticateUser)
 	private.HandleFunc("/whoami", s.whoami()).Methods(http.MethodGet)
-	private.HandleFunc("/refresh", s.refreshToken()).Methods(http.MethodPost)
 
 	// Swagger
 	s.Router.PathPrefix("/swagger").Handler(httpSwagger.WrapHandler)

@@ -3,7 +3,6 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/omekov/sample/internal/apiserver/models"
@@ -24,45 +23,47 @@ import (
 // @Failure 404 {object} models.Error
 // @Failure 500 {object} models.Error
 // @Router /signin [post]
-func (s *Server) signIn(w http.ResponseWriter, r *http.Request) {
+func (s *Server) signIn() http.HandlerFunc {
 	var credential *models.Credential
-	if err := json.NewDecoder(r.Body).Decode(&credential); err != nil {
-		s.error(w, r, http.StatusBadRequest, err)
+	return func(w http.ResponseWriter, r *http.Request) {
+		if err := json.NewDecoder(r.Body).Decode(&credential); err != nil {
+			s.error(w, r, http.StatusBadRequest, err)
+			return
+		}
+		customer := &models.Customer{
+			Username:    credential.Username,
+			ReleaseDate: time.Now(),
+		}
+		err := s.Store.Customer.FindAndUpdate(r.Context(), customer)
+		if err != nil {
+			s.error(w, r, http.StatusForbidden, errIncorrectEmailPassword)
+			return
+		}
+		err = customer.ComparePassword(credential.Password)
+		if err != nil {
+			s.error(w, r, http.StatusForbidden, errIncorrectEmailPassword)
+			return
+		}
+		accToken, err := s.Store.JWT.NewAccessJWT(customer)
+		if err != nil {
+			s.error(w, r, http.StatusInternalServerError, err)
+			return
+		}
+		refToken, err := s.Store.JWT.NewRefreshJWT(customer)
+		if err != nil {
+			s.error(w, r, http.StatusInternalServerError, err)
+			return
+		}
+		if err := s.Store.Cache.SetCustomerIDAndRefreshToken(customer, refToken); err != nil {
+			s.error(w, r, http.StatusInternalServerError, err)
+			return
+		}
+		s.respond(w, r, http.StatusOK, models.Token{
+			AccessToken:  accToken,
+			Refreshtoken: refToken,
+		})
 		return
 	}
-	customer := &models.Customer{
-		Username:    credential.Username,
-		ReleaseDate: time.Now(),
-	}
-	err := s.Store.Customer.FindAndUpdate(r.Context(), customer)
-	if err != nil {
-		s.error(w, r, http.StatusUnauthorized, err)
-		return
-	}
-	err = customer.ComparePassword(credential.Password)
-	if err != nil {
-		s.error(w, r, http.StatusUnauthorized, err)
-		return
-	}
-	accToken, err := s.Store.JWT.NewJWT(customer)
-	if err != nil {
-		s.error(w, r, http.StatusInternalServerError, err)
-		return
-	}
-	refToken, err := s.Store.JWT.NewJWT(customer)
-	if err != nil {
-		s.error(w, r, http.StatusInternalServerError, err)
-		return
-	}
-	if err := s.Store.Cache.SetCustomerIDAndRefreshToken(customer, refToken); err != nil {
-		s.error(w, r, http.StatusInternalServerError, err)
-		return
-	}
-	s.respond(w, r, http.StatusOK, models.Token{
-		AccessToken:  accToken,
-		Refreshtoken: refToken,
-	})
-	return
 }
 
 // signUp godoc
@@ -79,18 +80,20 @@ func (s *Server) signIn(w http.ResponseWriter, r *http.Request) {
 // @Failure 404 {object} models.Error
 // @Failure 500 {object} models.Error
 // @Router /signup [post]
-func (s *Server) signUp(w http.ResponseWriter, r *http.Request) {
+func (s *Server) signUp() http.HandlerFunc {
 	var customer *models.Customer
-	if err := json.NewDecoder(r.Body).Decode(&customer); err != nil {
-		s.error(w, r, http.StatusBadRequest, err)
+	return func(w http.ResponseWriter, r *http.Request) {
+		if err := json.NewDecoder(r.Body).Decode(&customer); err != nil {
+			s.error(w, r, http.StatusBadRequest, err)
+			return
+		}
+		if err := s.Store.Customer.Create(r.Context(), customer); err != nil {
+			s.error(w, r, http.StatusInternalServerError, err)
+			return
+		}
+		s.respond(w, r, http.StatusCreated, nil)
 		return
 	}
-	if err := s.Store.Customer.Create(r.Context(), customer); err != nil {
-		s.error(w, r, http.StatusInternalServerError, err)
-		return
-	}
-	s.respond(w, r, http.StatusCreated, nil)
-	return
 }
 
 // whoami godoc
@@ -116,32 +119,31 @@ func (s *Server) whoami() http.HandlerFunc {
 
 // refresh godoc
 // @Summary Refresh token
-// @Description whoami input header Authorization Bearer <token>, return refresh in Claims
+// @Description http body refreshtoken sign new refresh token
 // @Tags sign
 // @Accept  json
 // @Produce  json
-// @Success 200 {string} string "token"
+// @Param refresh body models.Token true "Refresh auth"
+// @Success 200 {object} models.Token
 // @Failure 400 {object} models.Error
 // @Failure 401 {object} models.Error
 // @Failure 403 {object} models.Error
 // @Failure 404 {object} models.Error
 // @Failure 500 {object} models.Error
-// @Security ApiKeyAuth
-// @Router /api/refresh [post]
+// @Router /refresh [post]
 func (s *Server) refreshToken() http.HandlerFunc {
+	var token *models.Token
 	return func(w http.ResponseWriter, r *http.Request) {
-		tokenHeader := r.Header.Get("Authorization")
-		if tokenHeader == "" {
-			s.error(w, r, http.StatusUnauthorized, errNotAuthenticated)
+		if err := json.NewDecoder(r.Body).Decode(&token); err != nil {
+			s.error(w, r, http.StatusBadRequest, err)
 			return
 		}
-		splitted := strings.Split(tokenHeader, " ")
-		token, err := s.Store.JWT.RefreshJWT(splitted[1])
+		newToken, err := s.Store.JWT.GetRefreshJWT(token.Refreshtoken)
 		if err != nil {
-			s.error(w, r, http.StatusUnauthorized, err)
+			s.error(w, r, http.StatusInternalServerError, err)
 			return
 		}
-		s.respond(w, r, http.StatusOK, token)
+		s.respond(w, r, http.StatusOK, newToken)
 	}
 }
 

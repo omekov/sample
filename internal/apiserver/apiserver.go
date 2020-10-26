@@ -1,13 +1,10 @@
 package apiserver
 
 import (
-	"flag"
 	"log"
-	"os"
 
-	"github.com/joho/godotenv"
+	"github.com/omekov/sample/config"
 	"github.com/omekov/sample/internal/apiserver/handlers"
-	"github.com/omekov/sample/internal/apiserver/models"
 	"github.com/omekov/sample/internal/apiserver/stores"
 	"github.com/omekov/sample/internal/apiserver/stores/cache"
 	"github.com/omekov/sample/internal/apiserver/stores/jwt"
@@ -18,39 +15,6 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-const (
-	MONGOURI               = "MONGOURI" // MONGOURI - ...
-	MONGONAME              = "MONGONAME"
-	MONGOUSERNAME          = "MONGOUSERNAME"
-	MONGOPASSWORD          = "MONGOPASSWORD"
-	MONGOAUTHCOLLECTION    = "MONGOAUTHCOLLECTION"
-	MONGOPODCASTCOLLECTION = "MONGOPODCASTCOLLECTION"
-	TOKENSECRET            = "TOKENSECRET"
-	PORT                   = "PORT"
-	REDISPASSWORD          = "REDISPASSWORD"
-	REDISURI               = "REDISURI"
-)
-
-// IsReadyENV ...
-func IsReadyENV(key string) string {
-	if os.Getenv(key) == "" {
-		log.Fatalf("Error is not env - %s", key)
-		return ""
-	}
-	return os.Getenv(key)
-}
-
-// FlagAndLoadENV ...
-func FlagAndLoadENV() {
-	useENV := flag.Bool("env", false, "not load env file")
-	flag.Parse()
-	if *useENV {
-		if err := godotenv.Load(); err != nil {
-			log.Fatal("Error loading .env file ", err)
-		}
-	}
-}
-
 // Run ...
 func Run() {
 	if err := newServer(); err != nil {
@@ -58,54 +22,38 @@ func Run() {
 	}
 }
 
-// GetMongoConfig ...
-func GetMongoConfig() *models.MongoConfig {
-	return &models.MongoConfig{
-		Username:     IsReadyENV(MONGOUSERNAME),
-		Password:     IsReadyENV(MONGOPASSWORD),
-		URL:          IsReadyENV(MONGOURI),
-		DatabaseName: IsReadyENV(MONGONAME),
-	}
-}
-
-// GetRedisConfig ...
-func GetRedisConfig() *models.RedisConfig {
-	return &models.RedisConfig{
-		Password: IsReadyENV(REDISPASSWORD),
-		URL:      IsReadyENV(REDISURI),
-	}
-}
-
 func newServer() error {
-	FlagAndLoadENV()
-	dbClient, err := mongos.NewClient(GetMongoConfig())
+	config.Init()
+	dbClient, err := mongos.NewClient(config.GetMongoConfig())
 	if err != nil {
 		return err
 	}
 	if err = dbClient.Connect(); err != nil {
 		return err
 	}
-	redisClient, err := cache.NewClient(GetRedisConfig())
+	redisClient, err := cache.NewClient(config.GetRedisConfig())
 	if err != nil {
 		return err
 	}
-	db := mongos.NewDatabase(GetMongoConfig(), dbClient)
+	db := mongos.NewDatabase(config.GetMongoConfig(), dbClient)
 	customer := customer.NewCustomerRepository(
 		db,
-		"customers",
+		config.IsReadyENV(config.MONGOCUSTOMERSCOLLECTION),
 	)
-	jwtoken := jwt.NewConfig([]byte(IsReadyENV(TOKENSECRET)), 5)
 	server := handlers.Server{
 		Router: mux.NewRouter(),
 		Logger: logrus.New(),
 		Store: &stores.Store{
 			Customer: customer,
-			JWT:      jwtoken,
+			JWT: jwt.Config{
+				RefreshTokenSecret: []byte(config.IsReadyENV(config.REFRESHTOKENSECRET)),
+				AccessTokenSecret:  []byte(config.IsReadyENV(config.ACCESSTOKENSECRET)),
+			},
 			Cache: cache.Config{
 				Client: redisClient,
 			},
 		},
 	}
-	server.ConfigureRouter(IsReadyENV(PORT))
+	server.ConfigureRouter(config.IsReadyENV(config.PORT))
 	return nil
 }

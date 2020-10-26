@@ -2,38 +2,45 @@ const path = require('path')
 // для того чтобы загрузить .env
 require('dotenv').config()
 // сам webpack
-import webpack from 'webpack'
+const webpack = require('webpack')
 // Для чтения html файлов. И его настроит 
-import HtmlWebpackPlugin from 'html-webpack-plugin'
+const HtmlWebpackPlugin = require('html-webpack-plugin')
 // Для очиститки dist 
-import { CleanWebpackPlugin } from 'clean-webpack-plugin'
+const { CleanWebpackPlugin } = require('clean-webpack-plugin')
+
 // Для того чтобы создать css 
-import MiniCssExtractPlugin from 'mini-css-extract-plugin'
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 // Для копирование. Пример с src в dist
-import CopyWebpackPlugin from 'copy-webpack-plugin'
+const CopyWebpackPlugin = require('copy-webpack-plugin')
+
 // Для минимизации css в одну строку
-import OptimizeCssAssetWebpackPlugin from 'optimize-css-assets-webpack-plugin'
+const OptimizeCssAssetWebpackPlugin = require('optimize-css-assets-webpack-plugin')
+
 // для минимизации js в одну строку
-import TerserWebpackPlugin from 'terser-webpack-plugin'
+const TerserWebpackPlugin = require('terser-webpack-plugin')
+
 // для просмотра оптимизаций
-import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer'
+const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer')
+
 // Вместо eslint-loader
-import ESLintPlugin, {Options} from 'eslint-webpack-plugin'
+const ESLintPlugin = require('eslint-webpack-plugin')
+
 
 // для очистки лишних css
-import CleanCSS from 'clean-css'
+const CleanCSS = require('clean-css')
+
 const PORT = parseInt(process.env.PORT || '8080')
 const mode = process.env.NODE_ENV == 'production' ? 'production' : 'development'
 const HOST = process.env.HOST || 'localhost'
 const isDev = mode === 'development'
-const isPord = mode === 'production'
+const isProd = mode === 'production'
 // Чтобы разделить по чанком, если встречается lazy load
-const optimization = (): webpack.Options.Optimization => {
+const optimization = () => {
     return {
         splitChunks: {
             chunks: 'all'
         },
-        minimizer: isPord ? [
+        minimizer: isProd ? [
             new OptimizeCssAssetWebpackPlugin({
                 // assetNameRegExp: /\.css$/g,
                 // cssProcessor: CleanCSS,
@@ -49,9 +56,9 @@ const optimization = (): webpack.Options.Optimization => {
 // Добавления паттерн хэша если в прод. Чтобы не кэшировались файлы
 const filename = (ext = '[ext]') => isDev ? `[name].${ext}` : `[name].[hash].${ext}`
 // path чтобы не повторять
-const pathJoin = (path1: string, path2 = '') => path.join(__dirname, path1, path2)
+const pathJoin = (path1, path2 = '') => path.join(__dirname, path1, path2)
 // Абсолютный путь
-const pathResolve = (path1: string, path2 = '') => path.resolve(__dirname, path1, path2)
+const pathResolve = (path1, path2 = '') => path.resolve(__dirname, path1, path2)
 // Плагины, для просмотра оптимизаций
 const plugins = () => {
     const base = [
@@ -62,7 +69,7 @@ const plugins = () => {
             template: pathJoin('src', 'index.html'),
             // для минимизации html в одну строку
             minify: {
-                collapseWhitespace: isPord,
+                collapseWhitespace: isProd,
                 removeComments: true,
                 removeRedundantAttributes: true,
                 useShortDoctype: true
@@ -91,22 +98,93 @@ const plugins = () => {
         }),
     ]
     if (isDev) {
-        const options: Options = {
+        const options = {
             extensions: ['ts', 'tsx'],
             failOnError: true,
-            
         }
         base.push(new ESLintPlugin(options))
     }
-    if (isPord) {
+    if (isProd) {
         base.push(new BundleAnalyzerPlugin())
     }
     return base
 }
 
+const modules = () => {
+    const base = [
+        {
+            // Обработка tsx  файлов
+            test: /\.tsx?$/,
+            exclude: /node_modules/,
+            use: 'ts-loader'
+        },
+        {
+            // обработчка css less файлов
+            test: /\.(c|le)ss$/,
+            use: [
+                {
+                    // Собрать в одну кучу
+                    loader: MiniCssExtractPlugin.loader,
+                    options: {
+                        hmr: isDev,
+                        reloadAll: true
+                    }
+                },
+                'css-loader',
+                'less-loader',
+            ],
+        },
+
+        // {
+        //     test: /\.(woff|woff2|ttf|eot|svg|png|j?g|gif|ico)?$/,
+        //     use: [
+        //         {
+        //             loader: 'file-loader',
+        //             options: {
+        //                 name: filename(),
+        //                 publicPath: 'assets'
+        //             },
+        //         }
+        //     ],
+        // },
+        {
+            // возможность обращения в b64
+            test: /\.(woff|woff2|ttf|eot|svg|png|j?g|gif|ico)?$/,
+            use: [
+                {
+                    loader: 'url-loader',
+                    options: {
+                        name: filename(),
+                        // Если файл больше 8 кб то его не надо base64
+                        limit: 8192,
+                    }
+                },
+            ],
+        },
+    ]
+    if (isDev) {
+        base.push(
+            {
+                test: /\.(ts|tsx)$/,
+                enforce: 'pre',
+                use: [
+                    {
+                        options: {
+                            eslintPath: require.resolve('eslint'),
+
+                        },
+                        loader: require.resolve('eslint-loader'),
+                    },
+                ],
+                exclude: /node_modules/,
+            }
+        )
+    }
+    return base
+}
 
 
-const config: webpack.Configuration = {
+module.exports = {
     // корень проект, откуда начинается файлы
     context: pathJoin('src'),
     // prod или dev
@@ -159,56 +237,7 @@ const config: webpack.Configuration = {
     },
     // лоудеры
     module: {
-        rules: [
-            {
-                // Обработка tsx  файлов
-                test: /\.tsx?$/,
-                exclude: /node_modules/,
-                use: 'ts-loader'
-            },
-            {
-                // обработчка css less файлов
-                test: /\.(c|le)ss$/,
-                use: [
-                    {
-                        // Собрать в одну кучу
-                        loader: MiniCssExtractPlugin.loader,
-                        options: {
-                            hmr: isDev,
-                            reloadAll: true
-                        }
-                    },
-                    'css-loader',
-                    'less-loader',
-                ],
-            },
-            // {
-            //     test: /\.(woff|woff2|ttf|eot|svg|png|j?g|gif|ico)?$/,
-            //     use: [
-            //         {
-            //             loader: 'file-loader',
-            //             options: {
-            //                 name: filename(),
-            //                 publicPath: 'assets'
-            //             },
-            //         }
-            //     ],
-            // },
-            {
-                // возможность обращения в b64
-                test: /\.(woff|woff2|ttf|eot|svg|png|j?g|gif|ico)?$/,
-                use: [
-                    {
-                        loader: 'url-loader',
-                        options: {
-                            name: filename(),
-                            // Если файл больше 8 кб то его не надо base64
-                            limit: 8192,
-                        }
-                    },
-                ],
-            },
-        ],
+        rules: modules(),
     },
     output: {
         // точка вывода
@@ -219,5 +248,3 @@ const config: webpack.Configuration = {
     // плагины
     plugins: plugins()
 }
-
-export default config

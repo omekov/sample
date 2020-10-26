@@ -9,6 +9,6 @@ import (
 // Store ...
 type Store struct {
 	Customer customer.CustomerRepository
-	JWT      *jwt.Config
+	JWT      jwt.Config
 	Cache    cache.Config
 }

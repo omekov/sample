@@ -32,14 +32,14 @@ var doc = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/refresh": {
-            "post": {
+        "/api/whoami": {
+            "get": {
                 "security": [
                     {
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "whoami input header Authorization Bearer \u003ctoken\u003e, return refresh in Claims",
+                "description": "whoami input header Authorization Bearer \u003ctoken\u003e, return parse in Claims",
                 "consumes": [
                     "application/json"
                 ],
@@ -49,10 +49,10 @@ var doc = `{
                 "tags": [
                     "sign"
                 ],
-                "summary": "Refresh token",
+                "summary": "Parse token",
                 "responses": {
                     "200": {
-                        "description": "token",
+                        "description": "Customer\":{\"username\": \"example@gmail.com\", \"firstname\": \"Adam\" },\"exp\": 1602666876}",
                         "schema": {
                             "type": "string"
                         }
@@ -90,14 +90,9 @@ var doc = `{
                 }
             }
         },
-        "/api/whoami": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "whoami input header Authorization Bearer \u003ctoken\u003e, return parse in Claims",
+        "/refresh": {
+            "post": {
+                "description": "http body refreshtoken sign new refresh token",
                 "consumes": [
                     "application/json"
                 ],
@@ -107,12 +102,23 @@ var doc = `{
                 "tags": [
                     "sign"
                 ],
-                "summary": "Parse token",
+                "summary": "Refresh token",
+                "parameters": [
+                    {
+                        "description": "Refresh auth",
+                        "name": "refresh",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.Token"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
-                        "description": "Customer\":{\"username\": \"example@gmail.com\", \"firstname\": \"Adam\" },\"exp\": 1602666876}",
+                        "description": "OK",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/models.Token"
                         }
                     },
                     "400": {
