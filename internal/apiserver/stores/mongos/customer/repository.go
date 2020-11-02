@@ -3,15 +3,16 @@ package customer
 import (
 	"context"
 
+	"errors"
+
 	"github.com/omekov/sample/internal/apiserver/models"
 	"github.com/omekov/sample/internal/apiserver/stores/mongos"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
-	"errors"
 )
 
 type config struct {
-	DB     mongos.Database
+	DB         mongos.Database
 	Collection string
 }
 
@@ -25,7 +26,7 @@ type CustomerRepository interface {
 // NewCustomerRepository ...
 func NewCustomerRepository(db mongos.Database, collection string) CustomerRepository {
 	return &config{
-		DB:     db,
+		DB:         db,
 		Collection: collection,
 	}
 }
@@ -33,7 +34,7 @@ func NewCustomerRepository(db mongos.Database, collection string) CustomerReposi
 // FindCustomer ...
 func (c *config) FindCustomer(ctx context.Context, customer *models.Customer) error {
 	err := c.DB.Collection(c.Collection).FindOne(ctx, bson.D{
-		{Key: "username", Value: customer.Username},
+		{Key: "username", Value: customer.Credential.Username},
 	}).Decode(&customer)
 	if err != nil {
 		return err
@@ -42,7 +43,7 @@ func (c *config) FindCustomer(ctx context.Context, customer *models.Customer) er
 }
 
 // UpdateCustomer ...
-func (c *config) UpdateCustomer(ctx context.Context,  customer *models.Customer, update interface{}) error {
+func (c *config) UpdateCustomer(ctx context.Context, customer *models.Customer, update interface{}) error {
 	if _, err := c.DB.Collection(c.Collection).UpdateOne(ctx, customer.ID, update); err != nil {
 		return err
 	}
@@ -70,4 +71,3 @@ func (c *config) CreateCustomer(ctx context.Context, customer *models.Customer) 
 	}
 	return errors.New("such username already exists")
 }
-

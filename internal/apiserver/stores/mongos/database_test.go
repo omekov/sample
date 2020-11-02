@@ -1,15 +1,16 @@
 package mongos_test
 
 import (
-	"os"
-	"regexp"
 	"errors"
 	"log"
+	"os"
+	"regexp"
 	"testing"
 
 	"github.com/joho/godotenv"
 	"github.com/omekov/sample/internal/apiserver"
 	"github.com/omekov/sample/internal/apiserver/stores/mongos"
+	"github.com/omekov/sample/internal/apiserver/stores/mongos/customer"
 	"github.com/omekov/sample/internal/apiserver/stores/mongos/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -19,15 +20,15 @@ type MockDatabaseHelper struct {
 	mock.Mock
 }
 
-func (_m *MockDatabaseHelper) Client() mongos.CustomerRepository {
+func (_m *MockDatabaseHelper) Client() customer.CustomerRepository {
 	ret := _m.Called()
 
-	var r0 mongos.CustomerRepository
-	if rf, ok := ret.Get(0).(func() mongos.CustomerRepository); ok {
+	var r0 customer.CustomerRepository
+	if rf, ok := ret.Get(0).(func() customer.CustomerRepository); ok {
 		r0 = rf()
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(mongos.CustomerRepository)
+			r0 = ret.Get(0).(customer.CustomerRepository)
 		}
 	}
 	return r0

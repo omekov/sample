@@ -3,8 +3,8 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
-	"time"
 	"strings"
+	"time"
 
 	"github.com/omekov/sample/internal/apiserver/models"
 	"go.mongodb.org/mongo-driver/bson"
@@ -30,14 +30,14 @@ func (s *Server) signIn(w http.ResponseWriter, r *http.Request) {
 		s.error(w, r, http.StatusBadRequest, err)
 		return
 	}
-	pass := customer.Password
+	pass := customer.Credential.Password
 	err := s.Store.Customer.FindCustomer(r.Context(), customer)
-	if err != nil  {
+	if err != nil {
 		s.error(w, r, http.StatusUnauthorized, err)
 		return
 	}
-	err = customer.ComparePassword(pass) 
-	if err != nil  {
+	err = customer.ComparePassword(pass)
+	if err != nil {
 		s.error(w, r, http.StatusUnauthorized, err)
 		return
 	}
@@ -140,6 +140,7 @@ func (s *Server) refreshToken() http.HandlerFunc {
 		s.respond(w, r, http.StatusOK, token)
 	}
 }
+
 /*
 
 // getOrder godoc

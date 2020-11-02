@@ -1,14 +1,16 @@
 package models
 
 import (
-	"time"
-	validation "github.com/go-ozzo/ozzo-validation"
-	jwt "github.com/dgrijalva/jwt-go"
-	"github.com/go-ozzo/ozzo-validation/is"
-	"golang.org/x/crypto/bcrypt"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"errors"
+	"time"
+
+	jwt "github.com/dgrijalva/jwt-go"
+	validation "github.com/go-ozzo/ozzo-validation"
+	"github.com/go-ozzo/ozzo-validation/is"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"golang.org/x/crypto/bcrypt"
 )
+
 var (
 	errUserNotFound       = errors.New("user not found")
 	errUsernameAlready    = errors.New("such username already exists")
@@ -20,36 +22,38 @@ type Claims struct {
 	Customer Customer
 	jwt.StandardClaims
 }
+type Credential struct {
+	Username string `bson:"username,omitempty" json:"username,omitempty" example:"example@gmail.com"`
+	Password string `bson:"password,omitempty" json:"password,omitempty" example:"123456"`
+}
 
 // Customer ...
 type Customer struct {
-	ID               primitive.ObjectID `json:"-" swaggerignore:"true"`
-	Username         string             `json:"username,omitempty" example:"example@gmail.com"`
-	FirstName        string             `json:"firstname,omitempty" example:"Adam"`
-	Password         string             `json:"password,omitempty" example:"123456"`
-	RepeatPassword   string             `json:"repeatPassword,omitempty" example:"123456"`
-	EncryptedPassword   string          `json:"-" swaggerignore:"true"`
-	Blocked          bool               `json:"-" swaggerignore:"true"`
-	Actived          bool               `json:"-" swaggerignore:"true"`
-	RegistrationDate time.Time          `json:"-" swaggerignore:"true"`
-	ReleaseDate      time.Time          `json:"-" swaggerignore:"true"`
+	ID                primitive.ObjectID `bson:"_id,omitempty" json:"-" swaggerignore:"true"`
+	Credential        Credential
+	FirstName         string    `bson:"firstname,omitempty" json:"firstname,omitempty" example:"Adam"`
+	RepeatPassword    string    `json:"repeatPassword,omitempty" example:"123456"`
+	EncryptedPassword string    `bson:"encryptedPassword,omitempty" json:"-" swaggerignore:"true"`
+	Blocked           bool      `bson:"blocked,omitempty" json:"-" swaggerignore:"true"`
+	Actived           bool      `bson:"actived,omitempty" json:"-" swaggerignore:"true"`
+	RegistrationDate  time.Time `bson:"registrationDate,omitempty" json:"-" swaggerignore:"true"`
+	ReleaseDate       time.Time `bson:"releaseDate,omitempty" json:"-" swaggerignore:"true"`
 }
-
 
 // Validate ...
 func (c *Customer) Validate() error {
 	return validation.ValidateStruct(
 		c,
-		validation.Field(&c.Username, validation.Required, is.Email),
-		validation.Field(&c.Password, validation.By(requiredIf(c.EncryptedPassword == "")), validation.Length(6, 100)),
-		validation.Field(&c.RepeatPassword, validation.Required, validation.By(repeatPassword(c.Password, c.RepeatPassword)), validation.Length(6, 100)),
+		validation.Field(&c.Credential.Username, validation.Required, is.Email),
+		validation.Field(&c.Credential.Password, validation.By(requiredIf(c.EncryptedPassword == "")), validation.Length(6, 100)),
+		validation.Field(&c.RepeatPassword, validation.Required, validation.By(repeatPassword(c.Credential.Password, c.RepeatPassword)), validation.Length(6, 100)),
 	)
 }
 
 // BeforeCreate ...
 func (c *Customer) BeforeCreate() error {
-	if len(c.Password) > 0 {
-		enc, err := encryptString(c.Password)
+	if len(c.Credential.Password) > 0 {
+		enc, err := encryptString(c.Credential.Password)
 		if err != nil {
 			return err
 		}
@@ -74,7 +78,7 @@ func (c *Customer) ComparePassword(password string) error {
 // Sanitize ...
 func (c *Customer) Sanitize() {
 	c.ID = primitive.NewObjectID()
-	c.Password = ""
+	c.Credential.Password = ""
 	c.RepeatPassword = ""
 	c.ReleaseDate = time.Now()
 	c.RegistrationDate = time.Now()

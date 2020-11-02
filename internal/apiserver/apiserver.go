@@ -93,6 +93,7 @@ func newServer() error {
 	if err = dbClient.Connect(); err != nil {
 		return err
 	}
+
 	db := mongos.NewDatabase(GetConfig(), dbClient)
 	customer := customer.NewCustomerRepository(
 		db,
