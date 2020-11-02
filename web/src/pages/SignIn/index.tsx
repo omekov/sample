@@ -2,7 +2,7 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import { Button, Form, Message, Segment } from 'semantic-ui-react'
-import { PageSingleWrapper } from '@components/PageSingleWrapper/PageSingleWrapper'
+import { PageSingleWrapper } from '@/components/PageSingleWrapper/PageSingleWrapper'
 const SignIn = () => (
     <PageSingleWrapper title='Авторизация'>
         <Form size='large'>

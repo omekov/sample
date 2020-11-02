@@ -18,13 +18,10 @@
         "outDir": "./dist",
         "noImplicitAny": true,
         "sourceMap": true,
-        "baseUrl": "src",
+        "baseUrl": ".",
         "paths": {
-            "@components": [
-                "components"
-            ],
-            "@pages": [
-                "pages"
+            "@/*": [
+                "src/*"
             ]
         }
     },

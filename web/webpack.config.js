@@ -227,9 +227,8 @@ module.exports = {
     // для обратки пути файлов с корни проекта
     resolve: {
         alias: {
+            '@': pathJoin('src'),
             '../../theme.config': pathJoin('src/semantic-ui/theme.config'),
-            '@components': pathJoin('src/components'),
-            '@pages': pathJoin('src/pages'),
             'src/semantic-ui/site': pathJoin('src/semantic-ui/site')
         },
         // возможность не указывать форматы файлов в import
