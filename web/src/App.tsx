@@ -1,10 +1,10 @@
 import React, { lazy, Suspense } from 'react'
 import { Route, Switch } from 'react-router-dom';
 import { HashRouter as Router } from 'react-router-dom';
-import {Loader} from 'semantic-ui-react';
-const pageSignUp = lazy(() => import('@pages/SignUp'))
-const pageSignIn = lazy(() => import('@pages/SignIn'))
-const pageLanding = lazy(() => import('@pages/Landing'))
+import { Loader } from 'semantic-ui-react';
+const pageSignUp = lazy(() => import('@/pages/SignUp'))
+const pageSignIn = lazy(() => import('@/pages/SignIn'))
+const pageLanding = lazy(() => import('@/pages/Landing'))
 
 const App = () => (
     <Router>

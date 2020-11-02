@@ -32,64 +32,6 @@ var doc = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/refresh": {
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "whoami input header Authorization Bearer \u003ctoken\u003e, return refresh in Claims",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "sign"
-                ],
-                "summary": "Refresh token",
-                "responses": {
-                    "200": {
-                        "description": "token",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/models.Error"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/models.Error"
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "schema": {
-                            "$ref": "#/definitions/models.Error"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/models.Error"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/models.Error"
-                        }
-                    }
-                }
-            }
-        },
         "/api/whoami": {
             "get": {
                 "security": [
@@ -148,6 +90,70 @@ var doc = `{
                 }
             }
         },
+        "/refresh": {
+            "post": {
+                "description": "http body refreshtoken sign new refresh token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sign"
+                ],
+                "summary": "Refresh token",
+                "parameters": [
+                    {
+                        "description": "Refresh auth",
+                        "name": "refresh",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.Token"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Token"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    }
+                }
+            }
+        },
         "/signin": {
             "post": {
                 "description": "Sign auth client the input paylod",
@@ -168,15 +174,15 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.Customer"
+                            "$ref": "#/definitions/models.Credential"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "qwerty",
+                        "description": "OK",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/models.Token"
                         }
                     },
                     "400": {
@@ -238,9 +244,9 @@ var doc = `{
                 ],
                 "responses": {
                     "201": {
-                        "description": "Created",
+                        "description": "ok",
                         "schema": {
-                            "$ref": "#/definitions/models.Customer"
+                            "type": "string"
                         }
                     },
                     "400": {
@@ -278,6 +284,19 @@ var doc = `{
         }
     },
     "definitions": {
+        "models.Credential": {
+            "type": "object",
+            "properties": {
+                "password": {
+                    "type": "string",
+                    "example": "-"
+                },
+                "username": {
+                    "type": "string",
+                    "example": "example@gmail.com"
+                }
+            }
+        },
         "models.Customer": {
             "type": "object",
             "properties": {
@@ -287,7 +306,7 @@ var doc = `{
                 },
                 "password": {
                     "type": "string",
-                    "example": "123456"
+                    "example": "-"
                 },
                 "repeatPassword": {
                     "type": "string",
@@ -305,6 +324,19 @@ var doc = `{
                 "error": {
                     "type": "string",
                     "example": "error"
+                }
+            }
+        },
+        "models.Token": {
+            "type": "object",
+            "properties": {
+                "accessToken": {
+                    "type": "string",
+                    "example": "jwt-token"
+                },
+                "refreshToken": {
+                    "type": "string",
+                    "example": "jwt-token"
                 }
             }
         }

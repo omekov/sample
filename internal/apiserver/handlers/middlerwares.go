@@ -39,18 +39,18 @@ func (s *Server) authenticateUser(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		tokenHeader := r.Header.Get("Authorization")
 		if tokenHeader == "" {
-			s.error(w, r, http.StatusForbidden, errNotAuthenticated)
+			s.error(w, r, http.StatusBadRequest, errNotAuthenticated)
 			return
 		}
 		splitted := strings.Split(tokenHeader, " ")
 		if len(splitted) != 2 {
-			s.error(w, r, http.StatusForbidden, errNotAuthenticated)
+			s.error(w, r, http.StatusBadRequest, errNotAuthenticated)
 			return
 		}
-		var customer models.Customer
-		u, err := customer.Customer(splitted, s.TokenSecret)
+
+		u, err := s.Store.JWT.GetClaims(splitted[1])
 		if err != nil {
-			s.error(w, r, http.StatusUnauthorized, err)
+			s.error(w, r, http.StatusInternalServerError, err)
 			return
 		}
 		next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), ctxKeyUser, u)))
@@ -101,7 +101,7 @@ func (s *Server) error(w http.ResponseWriter, r *http.Request, code int, err err
 		"request_id":  r.Context().Value(ctxKeyRequestID),
 	})
 	logger.Infof("%s", err.Error())
-	if code == http.StatusUnauthorized {
+	if code == http.StatusForbidden {
 		s.respond(w, r, code, models.Error{Error: errIncorrectEmailPassword.Error()})
 	} else {
 		s.respond(w, r, code, models.Error{Error: err.Error()})

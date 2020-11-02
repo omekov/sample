@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/joho/godotenv"
-	"github.com/omekov/sample/internal/apiserver"
+	"github.com/omekov/sample/config"
 	"github.com/omekov/sample/internal/apiserver/stores/mongos"
 	"github.com/omekov/sample/internal/apiserver/stores/mongos/customer"
 	"github.com/omekov/sample/internal/apiserver/stores/mongos/mocks"
@@ -51,10 +51,10 @@ func TestNewDatabase(t *testing.T) {
 	re := regexp.MustCompile("^(.*pre-sample)")
 	cwd, _ := os.Getwd()
 	rootPath := re.Find([]byte(cwd))
-	if err := godotenv.Load(string(rootPath) + `/.env.prod`); err != nil {
+	if err := godotenv.Load(string(rootPath) + `/config/.env`); err != nil {
 		log.Fatal("Error loading .env file ", err)
 	}
-	conf := apiserver.GetConfig()
+	conf := config.GetMongoConfig()
 	dbClient, err := mongos.NewClient(conf)
 	assert.NoError(t, err)
 	db := mongos.NewDatabase(conf, dbClient)

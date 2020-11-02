@@ -1,0 +1,28 @@
+{
+  "name": "js-unit-testing",
+  "version": "1.0.0",
+  "description": "unit test of js",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/omekov/js-unit-testing.git"
+  },
+  "keywords": [
+    "js",
+    "jest",
+    "enyzyme"
+  ],
+  "author": "Omekov A.",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/omekov/js-unit-testing/issues"
+  },
+  "homepage": "https://github.com/omekov/js-unit-testing#readme",
+  "devDependencies": {
+    "axios": "^0.21.0",
+    "jest": "^26.6.1"
+  }
+}

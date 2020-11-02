@@ -1,4 +1,5 @@
 .env*
 .vscode
 *.exe
-vendor
+/config/.env
+/docs

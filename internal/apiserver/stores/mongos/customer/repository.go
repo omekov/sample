@@ -18,9 +18,10 @@ type config struct {
 
 // CustomerRepository ...
 type CustomerRepository interface {
-	FindCustomer(context.Context, *models.Customer) error
-	CreateCustomer(context.Context, *models.Customer) error
-	UpdateCustomer(context.Context, *models.Customer, interface{}) error
+	Find(context.Context, *models.Customer) error
+	Create(context.Context, *models.Customer) error
+	Update(context.Context, *models.Customer, interface{}) error
+	FindAndUpdate(context.Context, *models.Customer) error
 }
 
 // NewCustomerRepository ...
@@ -31,27 +32,43 @@ func NewCustomerRepository(db mongos.Database, collection string) CustomerReposi
 	}
 }
 
-// FindCustomer ...
-func (c *config) FindCustomer(ctx context.Context, customer *models.Customer) error {
-	err := c.DB.Collection(c.Collection).FindOne(ctx, bson.D{
-		{Key: "username", Value: customer.Credential.Username},
-	}).Decode(&customer)
-	if err != nil {
-		return err
-	}
-	return nil
+func (c *config) Find(ctx context.Context, customer *models.Customer) error {
+	return c.DB.Collection(c.Collection).FindOne(
+		ctx,
+		bson.M{
+			"username": customer.Username,
+		},
+	).Decode(&customer)
 }
 
-// UpdateCustomer ...
-func (c *config) UpdateCustomer(ctx context.Context, customer *models.Customer, update interface{}) error {
+// FindAndUpdate ...
+func (c *config) FindAndUpdate(ctx context.Context, customer *models.Customer) error {
+	return c.DB.Collection(c.Collection).FindOneAndUpdate(
+		ctx,
+		bson.M{
+			"username": customer.Username,
+		},
+		bson.D{
+			{
+				"$set",
+				bson.M{
+					"releaseDate": customer.ReleaseDate,
+				},
+			},
+		},
+	).Decode(&customer)
+}
+
+// Update ...
+func (c *config) Update(ctx context.Context, customer *models.Customer, update interface{}) error {
 	if _, err := c.DB.Collection(c.Collection).UpdateOne(ctx, customer.ID, update); err != nil {
 		return err
 	}
 	return nil
 }
 
-// CreateCustomer ...
-func (c *config) CreateCustomer(ctx context.Context, customer *models.Customer) error {
+// Create ...
+func (c *config) Create(ctx context.Context, customer *models.Customer) error {
 	if err := customer.Validate(); err != nil {
 		return err
 	}
@@ -59,7 +76,7 @@ func (c *config) CreateCustomer(ctx context.Context, customer *models.Customer) 
 		return err
 	}
 	customer.Sanitize()
-	err := c.FindCustomer(ctx, customer)
+	err := c.Find(ctx, customer)
 	if err == mongo.ErrNoDocuments {
 		_, err = c.DB.Collection(c.Collection).InsertOne(ctx, customer)
 		if err != nil {
