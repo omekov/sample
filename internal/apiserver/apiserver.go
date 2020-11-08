@@ -23,7 +23,7 @@ func Run() {
 }
 
 func newServer() error {
-	config.Init()
+	config.Init(".env")
 	dbClient, err := mongos.NewClient(config.GetMongoConfig())
 	if err != nil {
 		return err

@@ -2,12 +2,8 @@ package mongos_test
 
 import (
 	"errors"
-	"log"
-	"os"
-	"regexp"
 	"testing"
 
-	"github.com/joho/godotenv"
 	"github.com/omekov/sample/config"
 	"github.com/omekov/sample/internal/apiserver/stores/mongos"
 	"github.com/omekov/sample/internal/apiserver/stores/mongos/customer"
@@ -48,12 +44,7 @@ func (_m *MockDatabaseHelper) Collection(name string) mongos.Collection {
 }
 
 func TestNewDatabase(t *testing.T) {
-	re := regexp.MustCompile("^(.*pre-sample)")
-	cwd, _ := os.Getwd()
-	rootPath := re.Find([]byte(cwd))
-	if err := godotenv.Load(string(rootPath) + `/config/.env`); err != nil {
-		log.Fatal("Error loading .env file ", err)
-	}
+	config.Init("../../../../config/.env")
 	conf := config.GetMongoConfig()
 	dbClient, err := mongos.NewClient(conf)
 	assert.NoError(t, err)
@@ -67,7 +58,7 @@ func TestStartSession(t *testing.T) {
 	db = &mocks.DatabaseHelper{}
 	client = &mocks.ClientHelper{}
 	client.(*mocks.ClientHelper).On("StartSession").Return(nil, errors.New("mocked-error"))
-	// db.(*MockDatabaseHelper).On("Client").Return(client)
+	db.(*MockDatabaseHelper).On("Client").Return(client)
 	_, err := db.Client().StartSession()
 	assert.EqualError(t, err, "mocked-error")
 }

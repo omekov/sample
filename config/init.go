@@ -1,7 +1,6 @@
 package config
 
 import (
-	"flag"
 	"log"
 	"os"
 
@@ -32,13 +31,9 @@ func IsReadyENV(key string) string {
 }
 
 // Init ...
-func Init() {
-	useENV := flag.Bool("env", false, "not load env file")
-	flag.Parse()
-	if *useENV {
-		if err := godotenv.Load(); err != nil {
-			log.Fatal("Error loading .env file ", err)
-		}
+func Init(pathname string) {
+	if err := godotenv.Load(pathname); err != nil {
+		log.Fatal("Error loading .env file ", err)
 	}
 }
 

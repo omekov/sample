@@ -23,13 +23,14 @@ const TerserWebpackPlugin = require('terser-webpack-plugin')
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer')
 
 // Вместо eslint-loader
-const ESLintPlugin = require('eslint-webpack-plugin')
+// const ESLintPlugin = require('eslint-webpack-plugin')
 
 
 // для очистки лишних css
 const CleanCSS = require('clean-css')
 
 const PORT = parseInt(process.env.PORT || '8080')
+const API_URL = process.env.API_URL || 'http://localhost:9090'
 const mode = process.env.NODE_ENV == 'production' ? 'production' : 'development'
 const HOST = process.env.HOST || 'localhost'
 const isDev = mode === 'development'
@@ -97,14 +98,14 @@ const plugins = () => {
             ]
         }),
     ]
-    if (isDev) {
-        const options = {
-            extensions: ['ts', 'tsx'],
-            failOnError: true,
-        }
-        base.push(new ESLintPlugin(options))
-    }
-    if (isProd) {
+    // if (isDev) {
+    //     const options = {
+    //         extensions: ['ts', 'tsx'],
+    //         failOnError: true,
+    //     }
+    //     base.push(new ESLintPlugin(options))
+    // }
+    if (!isProd) {
         base.push(new BundleAnalyzerPlugin())
     }
     return base
@@ -194,7 +195,7 @@ module.exports = {
         app: pathJoin('src', 'index.tsx')
     },
     // Просмотривать исходный код без компилятора 
-    devtool: isDev ? 'source-map' : false,
+    devtool: 'source-map',
     devServer: {
         // Точка слежки
         contentBase: pathResolve('src'),
@@ -245,5 +246,10 @@ module.exports = {
         path: pathResolve('dist')
     },
     // плагины
-    plugins: plugins()
+    plugins: plugins(),
+    externals: {
+        config: JSON.stringify({
+            apiUrl: API_URL
+        })
+    }
 }

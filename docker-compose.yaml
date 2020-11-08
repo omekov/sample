@@ -1,37 +1,42 @@
 version: '3.5'
- 
+
 services:
   mongodb:
-    container_name: sample_database
+    container_name: sample_mongo_database
     image: mongo:latest
+    environment: 
+      MONGO_INITDB_ROOT_USERNAME: ${MONGOUSERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGOPASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGONAME}
     ports:
       - 27017:27017
     volumes:
       - mongodb_data_container:/data/db
     networks: 
       - samplenetwork
-    restart: unless-stopped
+    restart: always
 
-  # redis:
-  #   container_name: sample_cache
-  #   image: redis:latest
-  #   ports:
-  #     - "6379:6379"
-  #   networks:
-  #     - systemnetwork
+  redis:
+    container_name: sample_redis_cache
+    image: redis:latest
+    command: redis-server --requirepass ${REDISPASSWORD}
+    ports:
+      - "6379:6379"
+    networks:
+      - samplenetwork
 
   backend:
     container_name: sample_backend
     build: .
     env_file: 
-      - ./.env
+      - .env
     volumes: 
       - .:/usr/src/app/
     ports:
       - "9090:9090"
     depends_on: 
       - mongodb
-      # - redis
+      - redis
     networks: 
       - samplenetwork
     restart: on-failure
@@ -53,12 +58,12 @@ services:
   #   expose:
   #     - "80"
   #   ports:
-  #     - "5055:80"
+  #     - "80:80"
   #     - "443:443"
   #   depends_on: 
   #     - golang
   #   networks: 
-  #     - marketnetwork
+  #     - samplenetwork
       
 networks:
   samplenetwork:

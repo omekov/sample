@@ -20,6 +20,10 @@ type Server struct {
 	Store  *stores.Store
 }
 
+func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	s.Router.ServeHTTP(w, r)
+}
+
 // ConfigureRouter ...
 func (s *Server) ConfigureRouter(PORT string) *mux.Router {
 	s.Router.Use(s.setRequestID)
