@@ -8,6 +8,7 @@ import (
 type DatabaseHelper struct {
 	mock.Mock
 }
+
 // Client provides a mock function with given fields:
 func (_m *DatabaseHelper) Client() mongos.Client {
 	ret := _m.Called()

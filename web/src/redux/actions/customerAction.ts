@@ -1,75 +1,60 @@
-import { Credential, SIGNUP_SUCCESS, SET_MESSAGE, SIGNUP_FAIL, SIGNIN_SUCCESS, SIGNIN_FAIL, SIGNOUT } from "../types"
-import SignService from "@/services/sign.service"
 import { Dispatch } from "redux"
-import { useDispatch } from "react-redux"
+import axios, { AxiosResponse } from "axios"
+import { Tokens, Credential, SET_MESSAGE, SIGNUP_FAIL, SIGNUP_SUCCESS, SIGNIN_FAIL, SIGNIN_SUCCESS, SIGNREFRESH_SUCCESS, SIGNREFRESH_FAIL, SIGNOUT } from '@/redux/types'
+import SignService from "@/services/sign.service"
+import { handlerError } from "@/services/request.service"
 
-export const signUp = (data: any) => (dispatch: any) => {
+const SIGNUP_SUCCESS_TEXT = 'Регистрация прошла успешно'
+const SIGNIN_SUCCESS_TEXT = 'Авторизация прошла успешно'
+const REFRESH_SUCCESS_TEXT = 'Токен успешно обновлен'
+
+export const signUp = async (data: any) => (dispatch: Dispatch) => {
   return SignService.signUp(data)
-    .then(data => {
-      dispatch({
-        type: SIGNUP_SUCCESS
-      })
-      dispatch({
-        type: SET_MESSAGE,
-        payload: data
-      })
-      return Promise.resolve();
-    },
-      (err) => {
+    .then((response: AxiosResponse) => {
+      if (response.status == 201) {
         dispatch({
-          type: SIGNUP_FAIL,
-        });
+          type: SIGNUP_SUCCESS
+        })
         dispatch({
           type: SET_MESSAGE,
-          payload: err,
-        });
-        return Promise.reject();
-      })
+          payload: SIGNUP_SUCCESS_TEXT
+        })
+        return Promise.resolve()
+      }
+    }, (error) => handlerError(error, SIGNUP_FAIL, dispatch))
 }
 
-export const signIn = (data: Credential) => (dispatch: Dispatch) => {
-  return SignService.signIn(data).then(
-    (data) => {
-      dispatch({
-        type: SIGNIN_SUCCESS,
-        payload: data,
-      })
-      return Promise.resolve()
-    },
-    (err) => {
-      dispatch({
-        type: SIGNIN_FAIL,
-      });
-      dispatch({
-        type: SET_MESSAGE,
-        payload: err,
-      });
-      return Promise.reject();
-    })
-}
+export const signIn = async (data: Credential) => (dispatch: Dispatch) =>
+  SignService.signIn(data)
+    .then((response) => {
+      if (response.status == 200) {
+        dispatch({
+          type: SIGNIN_SUCCESS,
+          payload: { customer: response.data }
+        })
+        const headerValue = `Bearer ${response.data.accessToken}`
+        axios.defaults.headers.common['Authorization'] = headerValue
+        localStorage.setItem("access_token", JSON.stringify(response.data.accessToken));
+        localStorage.setItem("refresh_token", JSON.stringify(response.data.refreshToken));
+        return Promise.resolve()
+      }
+    }, (error) => handlerError(error, SIGNIN_FAIL, dispatch))
 
-export const refresh = (data: any) => (dispatch: any) => {
-  return SignService.signIn(data).then(
-    (data) => {
+
+export const refresh = (data: Tokens) => async (dispatch: Dispatch) => {
+  return SignService.refresh(data)
+    .then((response: AxiosResponse<Tokens>) => {
       dispatch({
-        type: SIGNIN_SUCCESS,
-        payload: data,
+        type: SIGNREFRESH_SUCCESS,
+        payload: response.data,
       })
       return Promise.resolve()
     },
-    (err) => {
-      dispatch({
-        type: SIGNIN_FAIL,
-      });
-      dispatch({
-        type: SET_MESSAGE,
-        payload: err,
-      });
-      return Promise.reject();
-    })
+      (error) => handlerError(error, SIGNREFRESH_FAIL, dispatch)
+    )
 }
 
-export const logout = () => (dispatch: any) => {
+export const logout = () => async (dispatch: Dispatch) => {
   SignService.logout();
   dispatch({
     type: SIGNOUT,

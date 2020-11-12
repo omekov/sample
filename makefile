@@ -1,10 +1,10 @@
 .PHONY: run
 run:
 				swag init
-				go run *.go -env
+				go run ./cmd/auth/*.go -env
 .PHONY: build
 build:
-				go build -v 
+				go build ./cmd/auth/ 
 .PHONY: test
 test:
 				go test -v -race -timeout 30s ./...

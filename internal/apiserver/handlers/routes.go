@@ -27,14 +27,15 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 // ConfigureRouter ...
 func (s *Server) ConfigureRouter(PORT string) *mux.Router {
 	s.Router.Use(s.setRequestID)
-	s.Router.Use(mux.CORSMethodMiddleware(s.Router))
+	s.Router.Use(s.setHeader)
+	// s.Router.Use(mux.CORSMethodMiddleware(s.Router))
 	s.Router.Use(s.logRequest)
-	s.Router.HandleFunc("/signin", s.signIn()).Methods(http.MethodPost)
-	s.Router.HandleFunc("/signup", s.signUp()).Methods(http.MethodPost)
-	s.Router.HandleFunc("/refresh", s.refreshToken()).Methods(http.MethodPost)
+	s.Router.HandleFunc("/signin", s.signIn()).Methods(http.MethodPost, http.MethodOptions)
+	s.Router.HandleFunc("/signup", s.signUp()).Methods(http.MethodPost, http.MethodOptions)
+	s.Router.HandleFunc("/refresh", s.refreshToken()).Methods(http.MethodPost, http.MethodOptions)
 	private := s.Router.PathPrefix("/api").Subrouter()
 	private.Use(s.authenticateUser)
-	private.HandleFunc("/whoami", s.whoami()).Methods(http.MethodGet)
+	private.HandleFunc("/whoami", s.whoami()).Methods(http.MethodGet, http.MethodOptions)
 
 	// Swagger
 	s.Router.PathPrefix("/swagger").Handler(httpSwagger.WrapHandler)

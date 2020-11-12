@@ -17,7 +17,6 @@ const initialState = accessToken
 
 export default function (state = initialState, action: any) {
   const { type, payload } = action;
-
   switch (type) {
     case SIGNUP_SUCCESS:
       return {
@@ -41,14 +40,14 @@ export default function (state = initialState, action: any) {
         ...state,
         isLoggedIn: false,
         accessToken: null,
-        refreshtoken: null,
+        refreshToken: null,
       }
     case SIGNOUT:
       return {
         ...state,
         isLoggedIn: false,
         accessToken: null,
-        refreshtoken: null,
+        refreshToken: null,
       }
     default:
       return state

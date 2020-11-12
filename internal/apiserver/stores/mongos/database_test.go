@@ -58,7 +58,7 @@ func TestStartSession(t *testing.T) {
 	db = &mocks.DatabaseHelper{}
 	client = &mocks.ClientHelper{}
 	client.(*mocks.ClientHelper).On("StartSession").Return(nil, errors.New("mocked-error"))
-	db.(*MockDatabaseHelper).On("Client").Return(client)
+	// db.(*MockDatabaseHelper).On("Client").Return(client)
 	_, err := db.Client().StartSession()
 	assert.EqualError(t, err, "mocked-error")
 }

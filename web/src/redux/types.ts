@@ -8,6 +8,13 @@ export interface Credential {
   username: string
   password: string
 }
+
+export interface CreateCustomer {
+  username: string
+  password: string
+  repeatPassword: string
+  firstname: string
+}
 export interface Tokens {
   accessToken?: string
   refreshToken: string
