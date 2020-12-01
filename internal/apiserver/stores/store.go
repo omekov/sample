@@ -10,7 +10,7 @@ import (
 type Store struct {
 	Databases Databases
 	JWT       *jwt.Config
-	Cachies   Cachies
+	Caches    Caches
 	Queues    Queues
 	Websocket Websocket
 }
@@ -31,7 +31,7 @@ type Queues struct {
 }
 
 // Cachies ...
-type Cachies struct {
+type Caches struct {
 	MemCache    string
 	RedisClient cache.Config
 }

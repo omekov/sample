@@ -2,7 +2,9 @@ package handlers
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
+	"sync/atomic"
 	"time"
 
 	"github.com/omekov/sample/internal/apiserver/models"
@@ -54,7 +56,7 @@ func (s *Server) signIn() http.HandlerFunc {
 			s.error(w, r, http.StatusInternalServerError, err)
 			return
 		}
-		if err := s.Store.Cachies.RedisClient.SetCustomerIDAndRefreshToken(customer, refToken); err != nil {
+		if err := s.Store.Caches.RedisClient.SetCustomerIDAndRefreshToken(customer, refToken); err != nil {
 			s.error(w, r, http.StatusInternalServerError, err)
 			return
 		}
@@ -145,4 +147,23 @@ func (s *Server) refreshToken() http.HandlerFunc {
 		}
 		s.respond(w, r, http.StatusOK, newToken)
 	}
+}
+
+func (s *Server) shutdown() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		status := models.ServerStatus{
+			ShutdownStatus: "On",
+		}
+		s.respond(w, r, http.StatusOK, status)
+
+		if !atomic.CompareAndSwapUint32(&s.Config.ReqCount, 0, 1) {
+			log.Printf("Shutdown through API call in progress...")
+			return
+		}
+
+		go func() {
+			s.Config.ShutdownReq <- true
+		}()
+	}
+
 }

@@ -27,7 +27,7 @@ func NewClient(cnf *models.RedisConfig) (*redis.Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	fmt.Printf("Redis PING - %s", pong)
+	fmt.Printf("Redis PING - %s\n", pong)
 	return client, nil
 }
 

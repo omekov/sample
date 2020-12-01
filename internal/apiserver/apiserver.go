@@ -62,7 +62,7 @@ func app() error {
 				},
 			},
 			JWT: config.GetJWTConfig(),
-			Cachies: stores.Cachies{
+			Caches: stores.Caches{
 				RedisClient: cache.Config{
 					Client: redisClient,
 				},

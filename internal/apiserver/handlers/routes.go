@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"sync/atomic"
 	"syscall"
 	"time"
 
@@ -52,7 +51,7 @@ func ConfigureRouter() *Config {
 }
 
 // Handlers ...
-func (s *Server) Handlers() {
+func (s *Server) handlers() *mux.Router {
 	s.Config.Router.Use(s.setRequestID)
 	s.Config.Router.Use(s.setHeader)
 	s.Config.Router.Use(mux.CORSMethodMiddleware(s.Config.Router))
@@ -60,71 +59,65 @@ func (s *Server) Handlers() {
 	s.Config.Router.HandleFunc("/signin", s.signIn()).Methods(http.MethodPost, http.MethodOptions)
 	s.Config.Router.HandleFunc("/signup", s.signUp()).Methods(http.MethodPost, http.MethodOptions)
 	s.Config.Router.HandleFunc("/refresh", s.refreshToken()).Methods(http.MethodPost, http.MethodOptions)
+	s.Config.Router.HandleFunc("/shutdown", s.shutdown()).Methods(http.MethodGet, http.MethodOptions)
 	private := s.Config.Router.PathPrefix("/api").Subrouter()
 	private.Use(s.authenticateUser)
 	private.HandleFunc("/whoami", s.whoami()).Methods(http.MethodGet, http.MethodOptions)
 
 	// Swagger
 	s.Config.Router.PathPrefix("/swagger").Handler(httpSwagger.WrapHandler)
-
+	return s.Config.Router
 }
 
-// WaitShutdown ...
-func (s *Server) WaitShutdown() {
-	irqSig := make(chan os.Signal, 1)
-	signal.Notify(irqSig, syscall.SIGINT, syscall.SIGTERM)
+func (s *Server) waitShutdown() {
+	signalChan := make(chan os.Signal, 1)
+	signal.Notify(
+		signalChan,
+		syscall.SIGHUP,  // kill -SIGHUP XXXX
+		syscall.SIGINT,  // kill -SIGINT XXXX or Ctrl+c
+		syscall.SIGQUIT, // kill -SIGQUIT XXXX
+	)
 
 	select {
-	case sig := <-irqSig:
+	case sig := <-signalChan:
 		log.Printf("Shutdown request (signal: %v)", sig)
 	case sig := <-s.Config.ShutdownReq:
 		log.Printf("Shutdown request (/shutdown %v)", sig)
 	}
 
 	log.Printf("Stoping http server ...")
-
 	//Create shutdown context with 10 second timeout
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	//shutdown the server
-	err := s.Config.Shutdown(ctx)
-	if err != nil {
-		log.Printf("Shutdown request error: %v", err)
-	}
-}
-
-// ShutdownHandler ...
-func (s *Server) ShutdownHandler(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Shutdown server"))
-
-	//Do nothing if shutdown request already issued
-	//if s.reqCount == 0 then set to 1, return true otherwise false
-	if !atomic.CompareAndSwapUint32(&s.Config.ReqCount, 0, 1) {
-		log.Printf("Shutdown through API call in progress...")
+	if err := s.Config.Shutdown(ctx); err != nil {
+		log.Printf("shutdown error: %v\n", err)
+		defer os.Exit(1)
 		return
+	} else {
+		log.Printf("gracefully stopped\n")
 	}
+	cancel()
 
-	go func() {
-		s.Config.ShutdownReq <- true
-	}()
+	defer os.Exit(0)
+	return
 }
 
 // Run ...
 func (s *Server) Run() {
 	server := ConfigureRouter()
-
+	server.Handler = s.handlers()
 	done := make(chan bool)
 	go func() {
-		err := server.ListenAndServe()
-		if err != nil {
-			log.Printf("Listen and serve: %v", err)
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("Failed to initialize server: %v\n", err)
 		}
 		done <- true
 	}()
 
 	//wait shutdown
-	s.WaitShutdown()
+	s.waitShutdown()
 
 	<-done
 }
