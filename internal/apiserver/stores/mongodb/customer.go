@@ -1,4 +1,4 @@
-package customer
+package mongodb
 
 import (
 	"context"
@@ -6,13 +6,12 @@ import (
 	"errors"
 
 	"github.com/omekov/sample/internal/apiserver/models"
-	"github.com/omekov/sample/internal/apiserver/stores/mongos"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type config struct {
-	DB         mongos.Database
+	DB         Database
 	Collection string
 }
 
@@ -25,7 +24,7 @@ type CustomerRepository interface {
 }
 
 // NewCustomerRepository ...
-func NewCustomerRepository(db mongos.Database, collection string) CustomerRepository {
+func NewCustomerRepository(db Database, collection string) CustomerRepository {
 	return &config{
 		DB:         db,
 		Collection: collection,

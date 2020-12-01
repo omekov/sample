@@ -21,6 +21,7 @@ require (
 	github.com/sirupsen/logrus v1.6.0
 	github.com/stretchr/objx v0.3.0 // indirect
 	github.com/stretchr/testify v1.6.1
+	github.com/stripe/stripe-go v70.15.0+incompatible // indirect
 	github.com/swaggo/http-swagger v0.0.0-20200308142732-58ac5e232fba
 	github.com/swaggo/swag v1.6.9
 	github.com/urfave/cli/v2 v2.3.0 // indirect

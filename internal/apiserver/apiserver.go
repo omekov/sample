@@ -8,8 +8,7 @@ import (
 	"github.com/omekov/sample/internal/apiserver/handlers"
 	"github.com/omekov/sample/internal/apiserver/stores"
 	"github.com/omekov/sample/internal/apiserver/stores/cache"
-	"github.com/omekov/sample/internal/apiserver/stores/mongos"
-	"github.com/omekov/sample/internal/apiserver/stores/mongos/customer"
+	"github.com/omekov/sample/internal/apiserver/stores/mongodb"
 
 	"github.com/sirupsen/logrus"
 )
@@ -22,16 +21,16 @@ func Run() {
 }
 
 // mongoDBConnect - методе подключаемся к mongodb и создаем ему базу и документы, также возвращаем методы по клиенту
-func mongoDBConnect() (customer.CustomerRepository, error) {
-	dbClient, err := mongos.NewClient(config.GetMongoConfig())
+func mongoDBConnect() (mongodb.CustomerRepository, error) {
+	dbClient, err := mongodb.NewClient(config.GetMongoConfig())
 	if err != nil {
 		return nil, err
 	}
 	if err = dbClient.Connect(); err != nil {
 		return nil, err
 	}
-	db := mongos.NewDatabase(config.GetMongoConfig(), dbClient)
-	customer := customer.NewCustomerRepository(
+	db := mongodb.NewDatabase(config.GetMongoConfig(), dbClient)
+	customer := mongodb.NewCustomerRepository(
 		db,
 		config.GetMongoConfig().Collections.Customer,
 	)
@@ -58,7 +57,7 @@ func app() error {
 		Logger: logrus.New(),
 		Store: &stores.Store{
 			Databases: stores.Databases{
-				MongoDB: mongos.MongoDBRepositories{
+				MongoDB: mongodb.MongoDBRepositories{
 					Customer: customer,
 				},
 			},

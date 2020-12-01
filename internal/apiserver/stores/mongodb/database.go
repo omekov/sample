@@ -1,6 +1,4 @@
-package mongos
-
-import "github.com/omekov/sample/internal/apiserver/stores/mongos/customer"
+package mongodb
 
 // Collections ...
 type Collections struct {
@@ -19,5 +17,5 @@ type MongoConfig struct {
 
 // MongoDBRepositories ...
 type MongoDBRepositories struct {
-	Customer customer.CustomerRepository
+	Customer CustomerRepository
 }

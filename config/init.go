@@ -7,7 +7,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/omekov/sample/internal/apiserver/models"
 	"github.com/omekov/sample/internal/apiserver/stores/jwt"
-	"github.com/omekov/sample/internal/apiserver/stores/mongos"
+	"github.com/omekov/sample/internal/apiserver/stores/mongodb"
 )
 
 const (
@@ -41,13 +41,13 @@ func Init(pathname string) {
 }
 
 // GetMongoConfig ...
-func GetMongoConfig() *mongos.MongoConfig {
-	return &mongos.MongoConfig{
+func GetMongoConfig() *mongodb.MongoConfig {
+	return &mongodb.MongoConfig{
 		Username:     IsReadyENV(MONGOUSERNAME),
 		Password:     IsReadyENV(MONGOPASSWORD),
 		URL:          IsReadyENV(MONGOURI),
 		DatabaseName: IsReadyENV(MONGONAME),
-		Collections: mongos.Collections{
+		Collections: mongodb.Collections{
 			Customer: IsReadyENV(MONGOCUSTOMERSCOLLECTION),
 			Roles:    IsReadyENV(MONGOROLESCOLLECTION),
 		},

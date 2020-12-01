@@ -3,3 +3,5 @@
 *.exe
 /config/.env
 /docs
+vendor
+__debug_bin

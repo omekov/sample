@@ -3,7 +3,7 @@ package stores
 import (
 	"github.com/omekov/sample/internal/apiserver/stores/cache"
 	"github.com/omekov/sample/internal/apiserver/stores/jwt"
-	"github.com/omekov/sample/internal/apiserver/stores/mongos"
+	"github.com/omekov/sample/internal/apiserver/stores/mongodb"
 )
 
 // Store ...
@@ -17,7 +17,7 @@ type Store struct {
 
 // Databases ...
 type Databases struct {
-	MongoDB mongos.MongoDBRepositories
+	MongoDB mongodb.MongoDBRepositories
 	// PostgresDB
 	// MySQLDB
 	// Cassandra
