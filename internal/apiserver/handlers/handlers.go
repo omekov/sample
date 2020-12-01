@@ -34,7 +34,7 @@ func (s *Server) signIn() http.HandlerFunc {
 			Username:    credential.Username,
 			ReleaseDate: time.Now(),
 		}
-		err := s.Store.Customer.FindAndUpdate(r.Context(), customer)
+		err := s.Store.Databases.MongoDB.Customer.FindAndUpdate(r.Context(), customer)
 		if err != nil {
 			s.error(w, r, http.StatusForbidden, errIncorrectEmailPassword)
 			return
@@ -54,7 +54,7 @@ func (s *Server) signIn() http.HandlerFunc {
 			s.error(w, r, http.StatusInternalServerError, err)
 			return
 		}
-		if err := s.Store.Cache.SetCustomerIDAndRefreshToken(customer, refToken); err != nil {
+		if err := s.Store.Cachies.RedisClient.SetCustomerIDAndRefreshToken(customer, refToken); err != nil {
 			s.error(w, r, http.StatusInternalServerError, err)
 			return
 		}
@@ -87,7 +87,7 @@ func (s *Server) signUp() http.HandlerFunc {
 			s.error(w, r, http.StatusBadRequest, err)
 			return
 		}
-		if err := s.Store.Customer.Create(r.Context(), customer); err != nil {
+		if err := s.Store.Databases.MongoDB.Customer.Create(r.Context(), customer); err != nil {
 			s.error(w, r, http.StatusInternalServerError, err)
 			return
 		}
@@ -146,76 +146,3 @@ func (s *Server) refreshToken() http.HandlerFunc {
 		s.respond(w, r, http.StatusOK, newToken)
 	}
 }
-
-/*
-
-// getOrder godoc
-// @Summary Get details for a given orderId
-// @Description Get details of order corresponding to the input orderId
-// @Tags orders
-// @Accept  json
-// @Produce  json
-// @Param orderId path int true "ID of the order"
-// @Success 200 {object} Order
-// @Router /orders/{id} [get]
-func getOrder(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	params := mux.Vars(r)
-	inputOrderID := params["id"]
-	for _, order := range orders {
-		if order.ID == inputOrderID {
-			json.NewEncoder(w).Encode(order)
-			return
-		}
-	}
-}
-
-// updateOrder godoc
-// @Summary Update order identified by the given orderId
-// @Description Update the order corresponding to the input orderId
-// @Tags orders
-// @Accept  json
-// @Produce  json
-// @Param orderId path int true "ID of the order to be updated"
-// @Param order body Order true "Update order"
-// @Success 200 {object} Order
-// @Router /orders/{id} [put]
-func updateOrder(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	params := mux.Vars(r)
-	inputOrderID := params["id"]
-	for i, order := range orders {
-		if order.ID == inputOrderID {
-			orders = append(orders[:i], orders[i+1:]...)
-			var updatedOrder Order
-			json.NewDecoder(r.Body).Decode(&updatedOrder)
-			orders = append(orders, updatedOrder)
-			json.NewEncoder(w).Encode(updatedOrder)
-			return
-		}
-	}
-}
-
-// deleteOrder godoc
-// @Summary Delete order identified by the given orderId
-// @Description Delete the order corresponding to the input orderId
-// @Tags orders
-// @Accept  json
-// @Produce  json
-// @Param orderId path int true "ID of the order to be deleted"
-// @Success 204 "No Content"
-// @Router /orders/{id} [delete]
-func deleteOrder(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	params := mux.Vars(r)
-	inputOrderID := params["id"]
-	for i, order := range orders {
-		if order.ID == inputOrderID {
-			orders = append(orders[:i], orders[i+1:]...)
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-	}
-}
-
-*/

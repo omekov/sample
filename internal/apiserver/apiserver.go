@@ -3,57 +3,73 @@ package apiserver
 import (
 	"log"
 
+	"github.com/go-redis/redis"
 	"github.com/omekov/sample/config"
 	"github.com/omekov/sample/internal/apiserver/handlers"
 	"github.com/omekov/sample/internal/apiserver/stores"
 	"github.com/omekov/sample/internal/apiserver/stores/cache"
-	"github.com/omekov/sample/internal/apiserver/stores/jwt"
 	"github.com/omekov/sample/internal/apiserver/stores/mongos"
 	"github.com/omekov/sample/internal/apiserver/stores/mongos/customer"
 
-	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 )
 
 // Run ...
 func Run() {
-	if err := newServer(); err != nil {
+	if err := app(); err != nil {
 		log.Fatal(err)
 	}
 }
 
-func newServer() error {
-	config.Init(".env.prod")
+// mongoDBConnect - методе подключаемся к mongodb и создаем ему базу и документы, также возвращаем методы по клиенту
+func mongoDBConnect() (customer.CustomerRepository, error) {
 	dbClient, err := mongos.NewClient(config.GetMongoConfig())
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if err = dbClient.Connect(); err != nil {
-		return err
-	}
-	redisClient, err := cache.NewClient(config.GetRedisConfig())
-	if err != nil {
-		return err
+		return nil, err
 	}
 	db := mongos.NewDatabase(config.GetMongoConfig(), dbClient)
 	customer := customer.NewCustomerRepository(
 		db,
-		config.IsReadyENV(config.MONGOCUSTOMERSCOLLECTION),
+		config.GetMongoConfig().Collections.Customer,
 	)
+	return customer, nil
+}
+
+// redisConnect - методе подключаемся к redis и кидаем пинг
+func redisConnect() (*redis.Client, error) {
+	return cache.NewClient(config.GetRedisConfig())
+}
+
+func app() error {
+	config.Init(".env.prod")
+	redisClient, err := redisConnect()
+	if err != nil {
+		return err
+	}
+	customer, err := mongoDBConnect()
+	if err != nil {
+		return err
+	}
 	server := handlers.Server{
-		Router: mux.NewRouter(),
+		Config: handlers.ConfigureRouter(),
 		Logger: logrus.New(),
 		Store: &stores.Store{
-			Customer: customer,
-			JWT: jwt.Config{
-				RefreshTokenSecret: []byte(config.IsReadyENV(config.REFRESHTOKENSECRET)),
-				AccessTokenSecret:  []byte(config.IsReadyENV(config.ACCESSTOKENSECRET)),
+			Databases: stores.Databases{
+				MongoDB: mongos.MongoDBRepositories{
+					Customer: customer,
+				},
 			},
-			Cache: cache.Config{
-				Client: redisClient,
+			JWT: config.GetJWTConfig(),
+			Cachies: stores.Cachies{
+				RedisClient: cache.Config{
+					Client: redisClient,
+				},
 			},
 		},
 	}
-	server.ConfigureRouter(config.IsReadyENV(config.PORT))
+	server.Run()
 	return nil
 }

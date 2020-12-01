@@ -82,6 +82,10 @@ func (c *config) Create(ctx context.Context, customer *models.Customer) error {
 		if err != nil {
 			return err
 		}
+		_, err = c.DB.Collection("roles").InsertOne(ctx, customer.Roles)
+		if err != nil {
+			return err
+		}
 		return nil
 	} else if err != nil {
 		return err

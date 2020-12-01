@@ -60,9 +60,18 @@ func (s *Server) authenticateUser(next http.Handler) http.Handler {
 // logRequest - middleware для логирование запросов
 func (s *Server) logRequest(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		s.Logger.Formatter = &logrus.JSONFormatter{
+			FieldMap: logrus.FieldMap{
+				logrus.FieldKeyTime:  "@t",
+				logrus.FieldKeyMsg:   "@m",
+				logrus.FieldKeyLevel: "@l",
+			},
+		}
+		// b, _ := ioutil.ReadAll(r.Body)
 		logger := s.Logger.WithFields(logrus.Fields{
 			"remote_addr": r.RemoteAddr,
 			"request_id":  r.Context().Value(ctxKeyRequestID),
+			// "request":     string(b),
 		})
 		logger.Infof("started %s %s", r.Method, r.RequestURI)
 		start := time.Now()
@@ -113,7 +122,6 @@ func (s *Server) setHeader(next http.Handler) http.Handler {
 		w.Header().Set("Access-Control-Allow-Headers", "*")
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Methods", "*")
-		w.Header().Add("Content-Type", "application/json")
 		if r.Method == http.MethodOptions {
 			w.WriteHeader(http.StatusOK)
 			return

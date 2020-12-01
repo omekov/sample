@@ -1,12 +1,14 @@
-import { Dispatch } from "redux"
+import { Dispatch, AnyAction } from "redux"
 import axios, { AxiosResponse } from "axios"
 import { Tokens, Credential, SET_MESSAGE, SIGNUP_FAIL, SIGNUP_SUCCESS, SIGNIN_FAIL, SIGNIN_SUCCESS, SIGNREFRESH_SUCCESS, SIGNREFRESH_FAIL, SIGNOUT } from '@/redux/types'
 import SignService from "@/services/sign.service"
 import { handlerError } from "@/services/request.service"
+import { ThunkAction, ThunkDispatch } from "redux-thunk"
 
 const SIGNUP_SUCCESS_TEXT = 'Регистрация прошла успешно'
 const SIGNIN_SUCCESS_TEXT = 'Авторизация прошла успешно'
 const REFRESH_SUCCESS_TEXT = 'Токен успешно обновлен'
+import { History } from 'history';
 
 export const signUp = async (data: any) => (dispatch: Dispatch) => {
   return SignService.signUp(data)
@@ -24,7 +26,7 @@ export const signUp = async (data: any) => (dispatch: Dispatch) => {
     }, (error) => handlerError(error, SIGNUP_FAIL, dispatch))
 }
 
-export const signIn = async (data: Credential) => (dispatch: Dispatch) =>
+export const signIn = (data: Credential, history: History): ThunkAction<Promise<void>, {}, {}, AnyAction> => (dispatch: ThunkDispatch<{}, {}, AnyAction>) =>
   SignService.signIn(data)
     .then((response) => {
       if (response.status == 200) {
@@ -36,6 +38,7 @@ export const signIn = async (data: Credential) => (dispatch: Dispatch) =>
         axios.defaults.headers.common['Authorization'] = headerValue
         localStorage.setItem("access_token", JSON.stringify(response.data.accessToken));
         localStorage.setItem("refresh_token", JSON.stringify(response.data.refreshToken));
+        history.push('/frontend')
         return Promise.resolve()
       }
     }, (error) => handlerError(error, SIGNIN_FAIL, dispatch))

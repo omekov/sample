@@ -50,6 +50,7 @@ https://medium.com/@jcox250/password-hash-salt-using-golang-b041dc94cb72
 - Возможность удалять чат
 
 Четвёртая задача:
+Пред история: знакомоства React хотелось основательно собрать свой pack. Детально расмотреть возможности webpack. Подключить Redux c typescript. Самом деле думаю typescript в React личное потому что она тормозит проект. В Ангуляре хоть идёт по умолчанию но возможности этого языка в мире ООП раскрывается в этом фрейворке. 
 - React, Redux подключаем наши api
 - выносим в nginx
 - если получится за деплои в google cloud
@@ -72,3 +73,9 @@ https://github.com/b-pagis/medium-mongo-go-driver/blob/master/databases/database
 
 Бесплатный смс
 https://www.twilio.com/
+
+Закончить shutdown
+
+https://stackoverflow.com/questions/43631854/gracefully-shutdown-gorilla-server
+
+https://dev.to/jacobsngoodwin/full-stack-memory-app-01-setup-go-server-with-reload-in-docker-62n

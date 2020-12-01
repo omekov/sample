@@ -8,12 +8,12 @@ import {
   SignActionTypes,
 } from '../types'
 
-const accessToken = localStorage.getItem('access_token')
-const refreshToken = localStorage.getItem('refresh_token')
+const accessToken = localStorage.getItem('access_token') || ""
+const refreshToken = localStorage.getItem('refresh_token') || ""
 
-const initialState = accessToken
+const initialState: SignState = accessToken
   ? { isLoggedIn: true, accessToken, refreshToken }
-  : { isLoggedIn: false, accessToken: null, refreshToken: null }
+  : { isLoggedIn: false, accessToken: "", refreshToken: "" }
 
 export default function (state = initialState, action: any) {
   const { type, payload } = action;

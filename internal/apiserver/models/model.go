@@ -1,13 +1,5 @@
 package models
 
-// MongoConfig ...
-type MongoConfig struct {
-	Username     string
-	Password     string
-	DatabaseName string
-	URL          string
-}
-
 // RedisConfig ...
 type RedisConfig struct {
 	Password string

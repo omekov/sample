@@ -33,6 +33,14 @@ type Customer struct {
 	Actived           bool               `bson:"actived,omitempty" json:"-" swaggerignore:"true"`
 	RegistrationDate  time.Time          `bson:"registrationDate,omitempty" json:"-" swaggerignore:"true"`
 	ReleaseDate       time.Time          `bson:"releaseDate,omitempty" json:"-" swaggerignore:"true"`
+	Roles             Roles              `bson:"roles,omitempty" json:"-" swaggerignore:"true"`
+}
+
+// Roles ...
+type Roles struct {
+	ID          primitive.ObjectID
+	Name        string
+	Description string
 }
 
 // Validate ...

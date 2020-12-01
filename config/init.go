@@ -6,6 +6,8 @@ import (
 
 	"github.com/joho/godotenv"
 	"github.com/omekov/sample/internal/apiserver/models"
+	"github.com/omekov/sample/internal/apiserver/stores/jwt"
+	"github.com/omekov/sample/internal/apiserver/stores/mongos"
 )
 
 const (
@@ -14,6 +16,7 @@ const (
 	MONGOUSERNAME            = "MONGOUSERNAME"
 	MONGOPASSWORD            = "MONGOPASSWORD"
 	MONGOCUSTOMERSCOLLECTION = "MONGOCUSTOMERSCOLLECTION"
+	MONGOROLESCOLLECTION     = "MONGOROLESCOLLECTION"
 	ACCESSTOKENSECRET        = "ACCESSTOKENSECRET"
 	REFRESHTOKENSECRET       = "REFRESHTOKENSECRET"
 	PORT                     = "PORT"
@@ -38,12 +41,16 @@ func Init(pathname string) {
 }
 
 // GetMongoConfig ...
-func GetMongoConfig() *models.MongoConfig {
-	return &models.MongoConfig{
+func GetMongoConfig() *mongos.MongoConfig {
+	return &mongos.MongoConfig{
 		Username:     IsReadyENV(MONGOUSERNAME),
 		Password:     IsReadyENV(MONGOPASSWORD),
 		URL:          IsReadyENV(MONGOURI),
 		DatabaseName: IsReadyENV(MONGONAME),
+		Collections: mongos.Collections{
+			Customer: IsReadyENV(MONGOCUSTOMERSCOLLECTION),
+			Roles:    IsReadyENV(MONGOROLESCOLLECTION),
+		},
 	}
 }
 
@@ -52,5 +59,13 @@ func GetRedisConfig() *models.RedisConfig {
 	return &models.RedisConfig{
 		Password: IsReadyENV(REDISPASSWORD),
 		URL:      IsReadyENV(REDISURI),
+	}
+}
+
+// GetJWTConfig
+func GetJWTConfig() *jwt.Config {
+	return &jwt.Config{
+		RefreshTokenSecret: []byte(IsReadyENV(REFRESHTOKENSECRET)),
+		AccessTokenSecret:  []byte(IsReadyENV(ACCESSTOKENSECRET)),
 	}
 }

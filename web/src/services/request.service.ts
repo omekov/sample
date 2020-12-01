@@ -1,8 +1,8 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios'
 import { Dispatch } from 'redux'
-import { SET_MESSAGE } from '@/redux/types'
+import { SET_MESSAGE, Tokens } from '@/redux/types'
 
-export const NewRequest = ({ url, method, data }: AxiosRequestConfig): Promise<AxiosResponse> => {
+export const NewRequest = ({ url, method, data }: AxiosRequestConfig): Promise<AxiosResponse<Tokens>> => {
   const headers = { 'Content-Type': 'application/json' }
   if (method == 'GET') {
     return axios.request({ url, method, headers })

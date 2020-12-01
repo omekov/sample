@@ -8,7 +8,6 @@ export interface Credential {
   username: string
   password: string
 }
-
 export interface CreateCustomer {
   username: string
   password: string
@@ -23,10 +22,18 @@ export interface ErrorText {
   error: string
 }
 
+export interface AppState {
+  sign: SignState
+  message: MessageState
+}
+
 export interface SignState {
   accessToken?: string
   refreshToken?: string
   isLoggedIn: boolean
+}
+export interface MessageState {
+  message: string
 }
 export const SIGNUP_SUCCESS = "SIGNUP_SUCCESS";
 export const SIGNUP_FAIL = "SIGNUP_FAIL";

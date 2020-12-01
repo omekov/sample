@@ -1,7 +1,8 @@
 import { combineReducers } from "redux";
-import auth from './sign'
+import sign from './sign'
 import message from './message'
-export default combineReducers({
-  auth,
+import { AppState } from "../types";
+export default combineReducers<AppState>({
+  sign,
   message
 })

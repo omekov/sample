@@ -3,7 +3,6 @@ package mongos
 import (
 	"context"
 
-	"github.com/omekov/sample/internal/apiserver/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -56,7 +55,7 @@ type mongoSession struct {
 }
 
 // NewClient ...
-func NewClient(cnf *models.MongoConfig) (Client, error) {
+func NewClient(cnf *MongoConfig) (Client, error) {
 	clientOptions := options.Client().SetAuth(
 		options.Credential{
 			Username:   cnf.Username,
@@ -69,7 +68,7 @@ func NewClient(cnf *models.MongoConfig) (Client, error) {
 }
 
 // NewDatabase ...
-func NewDatabase(cnf *models.MongoConfig, client Client) Database {
+func NewDatabase(cnf *MongoConfig, client Client) Database {
 	return client.Database(cnf.DatabaseName)
 }
 

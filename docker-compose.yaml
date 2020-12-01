@@ -11,7 +11,7 @@ services:
     ports:
       - 27017:27017
     volumes:
-      - mongodb_data_container:/data/db
+      - ./volumes/mongodb:/data/db
     networks: 
       - samplenetwork
     restart: always
@@ -31,7 +31,7 @@ services:
     env_file: 
       - .env
     volumes: 
-      - .:/usr/src/app/
+      - ./volumes/backend:/usr/src/app/
     ports:
       - "9090:9090"
     depends_on: 
@@ -40,43 +40,43 @@ services:
     networks: 
       - samplenetwork
     restart: on-failure
-  jenkins:
-    container_name: sample_jenkins
-    image: jenkins/jenkins:lts
-    privileged: true
-    user: root
+  # jenkins:
+  #   container_name: sample_jenkins
+  #   image: jenkins/jenkins:lts
+  #   privileged: true
+  #   user: root
+  #   networks: 
+  #     - samplenetwork
+  #   ports:
+  #     - 8081:8080
+  #     - 50000:50000
+  #   volumes:
+  #     - ~/jenkins:/var/jenkins_home
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #     - /usr/local/bin/docker:/usr/local/bin/docker
+  frontend:
+    container_name: sample_frontend
+    build: ./web
+    env_file: 
+      - ./web/.env
+    ports: 
+      - "80:80"
+    depends_on: 
+      - backend
     networks: 
       - samplenetwork
+  nginx:
+    build: "./nginx"
+    restart: always
+    expose:
+      - "80"
     ports:
-      - 8081:8080
-      - 50000:50000
-    volumes:
-      - ~/jenkins:/var/jenkins_home
-      - /var/run/docker.sock:/var/run/docker.sock
-      - /usr/local/bin/docker:/usr/local/bin/docker
-  # frontend:
-  #   container_name: sample_frontend
-  #   build: ./web
-  #   env_file: 
-  #     - ./web/.env
-  #   ports: 
-  #     - "80:80"
-  #   depends_on: 
-  #     - backend
-  #   networks: 
-  #     - samplenetwork
-  # nginx:
-  #   build: "./nginx"
-  #   restart: always
-  #   expose:
-  #     - "80"
-  #   ports:
-  #     - "80:80"
-  #     - "443:443"
-  #   depends_on: 
-  #     - golang
-  #   networks: 
-  #     - samplenetwork
+      - "80:80"
+      - "443:443"
+    depends_on: 
+      - frontend
+    networks: 
+      - samplenetwork
       
 networks:
   samplenetwork:

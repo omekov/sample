@@ -1,10 +1,11 @@
 import {
   SET_MESSAGE,
   CLEAR_MESSAGE,
+  MessageState
 } from '../types'
 
 
-const initialState = {};
+const initialState: MessageState = { message: "" };
 
 export default function (state = initialState, action: any) {
   const { type, payload } = action
