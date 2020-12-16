@@ -1,0 +1,8 @@
+.git
+.github
+.vscode
+web
+deployments
+.gitignore
+makefile
+readme.md

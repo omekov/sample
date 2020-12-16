@@ -1,9 +1,10 @@
 package stores
 
 import (
-	"github.com/omekov/sample/internal/apiserver/stores/cache"
+	"github.com/omekov/sample/internal/apiserver/stores/caches/redisdb"
 	"github.com/omekov/sample/internal/apiserver/stores/jwt"
 	"github.com/omekov/sample/internal/apiserver/stores/mongodb"
+	"github.com/streadway/amqp"
 )
 
 // Store ...
@@ -17,23 +18,24 @@ type Store struct {
 
 // Databases ...
 type Databases struct {
-	MongoDB mongodb.MongoDBRepositories
+	Mongo mongodb.Repository
 	// PostgresDB
-	// MySQLDB
+	// MariaDB
 	// Cassandra
 	// ElasticSearch
+	// CouchDB
 }
 
 // Queues ...
 type Queues struct {
-	RabbiMQ string
+	RabbiMQ amqp.Authentication
 	Kafka   string
 }
 
-// Cachies ...
+// Caches ...
 type Caches struct {
 	MemCache    string
-	RedisClient cache.Config
+	RedisClient redisdb.Config
 }
 
 // Websocket ...

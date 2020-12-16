@@ -1,7 +1,9 @@
-.env*
+/deployments/.env
+/deployments/.prod.env
 .vscode
 *.exe
 /config/.env
 /docs
 vendor
 __debug_bin
+/deployments/volumes

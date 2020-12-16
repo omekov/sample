@@ -1,11 +1,5 @@
 package models
 
-// RedisConfig ...
-type RedisConfig struct {
-	Password string
-	URL      string
-}
-
 // Error ...
 type Error struct {
 	Error string `json:"error,omitempty" example:"error"`
@@ -20,4 +14,9 @@ type Token struct {
 // ServerStatus ...
 type ServerStatus struct {
 	ShutdownStatus string `json:"shutdownStatus,omitempty"`
+}
+
+// ServerConfig ...
+type ServerConfig struct {
+	PORT string
 }

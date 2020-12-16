@@ -79,3 +79,25 @@ https://www.twilio.com/
 https://stackoverflow.com/questions/43631854/gracefully-shutdown-gorilla-server
 
 https://dev.to/jacobsngoodwin/full-stack-memory-app-01-setup-go-server-with-reload-in-docker-62n
+
+db.createUser({
+    user: 'admin',
+    pwd: '*****',
+    roles: [{ role: 'readWrite', db:'exclusive'}]
+})
+
+docker run -d --hostname sample_rabbit --name sample_rabbit -p 15672:15672 rabbitmq:3-management
+
+
+
+rabbitmq:
+
+```
+$ sudo rabbitmqctl add_user cc-admin taxi123
+Adding user "cc-admin" ...
+
+$ sudo rabbitmqctl set_user_tags cc-admin administrator
+Setting tags for user "cc-admin" to [administrator] ...
+
+sudo rabbitmqctl change_password guest guest123
+```

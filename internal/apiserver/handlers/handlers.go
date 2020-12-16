@@ -36,7 +36,7 @@ func (s *Server) signIn() http.HandlerFunc {
 			Username:    credential.Username,
 			ReleaseDate: time.Now(),
 		}
-		err := s.Store.Databases.MongoDB.Customer.FindAndUpdate(r.Context(), customer)
+		err := s.Store.Databases.Mongo.Customer.FindAndUpdate(r.Context(), customer)
 		if err != nil {
 			s.error(w, r, http.StatusForbidden, errIncorrectEmailPassword)
 			return
@@ -89,10 +89,14 @@ func (s *Server) signUp() http.HandlerFunc {
 			s.error(w, r, http.StatusBadRequest, err)
 			return
 		}
-		if err := s.Store.Databases.MongoDB.Customer.Create(r.Context(), customer); err != nil {
+		if err := s.Store.Databases.Mongo.Customer.FindAndCreate(r.Context(), customer); err != nil {
 			s.error(w, r, http.StatusInternalServerError, err)
 			return
 		}
+		// if err := rabbitmq.Send(customer, uuid.New()); err != nil {
+		// 	s.error(w, r, http.StatusInternalServerError, err)
+		// 	return
+		// }
 		s.respond(w, r, http.StatusCreated, nil)
 		return
 	}

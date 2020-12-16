@@ -10,29 +10,26 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-type config struct {
-	DB         Database
-	Collection string
+const (
+	CUSTOMERSCOLLECTION = "customers"
+	ROLESCOLLECTION     = "roles"
+)
+
+type Repository struct {
+	DB       Database
+	Customer CustomerRepository
 }
 
 // CustomerRepository ...
 type CustomerRepository interface {
 	Find(context.Context, *models.Customer) error
-	Create(context.Context, *models.Customer) error
+	FindAndCreate(context.Context, *models.Customer) error
 	Update(context.Context, *models.Customer, interface{}) error
 	FindAndUpdate(context.Context, *models.Customer) error
 }
 
-// NewCustomerRepository ...
-func NewCustomerRepository(db Database, collection string) CustomerRepository {
-	return &config{
-		DB:         db,
-		Collection: collection,
-	}
-}
-
-func (c *config) Find(ctx context.Context, customer *models.Customer) error {
-	return c.DB.Collection(c.Collection).FindOne(
+func (r *Repository) Find(ctx context.Context, customer *models.Customer) error {
+	return r.DB.Collection(CUSTOMERSCOLLECTION).FindOne(
 		ctx,
 		bson.M{
 			"username": customer.Username,
@@ -41,8 +38,8 @@ func (c *config) Find(ctx context.Context, customer *models.Customer) error {
 }
 
 // FindAndUpdate ...
-func (c *config) FindAndUpdate(ctx context.Context, customer *models.Customer) error {
-	return c.DB.Collection(c.Collection).FindOneAndUpdate(
+func (r *Repository) FindAndUpdate(ctx context.Context, customer *models.Customer) error {
+	return r.DB.Collection(CUSTOMERSCOLLECTION).FindOneAndUpdate(
 		ctx,
 		bson.M{
 			"username": customer.Username,
@@ -59,15 +56,15 @@ func (c *config) FindAndUpdate(ctx context.Context, customer *models.Customer) e
 }
 
 // Update ...
-func (c *config) Update(ctx context.Context, customer *models.Customer, update interface{}) error {
-	if _, err := c.DB.Collection(c.Collection).UpdateOne(ctx, customer.ID, update); err != nil {
+func (r *Repository) Update(ctx context.Context, customer *models.Customer, update interface{}) error {
+	if _, err := r.DB.Collection(CUSTOMERSCOLLECTION).UpdateOne(ctx, customer.ID, update); err != nil {
 		return err
 	}
 	return nil
 }
 
 // Create ...
-func (c *config) Create(ctx context.Context, customer *models.Customer) error {
+func (r *Repository) FindAndCreate(ctx context.Context, customer *models.Customer) error {
 	if err := customer.Validate(); err != nil {
 		return err
 	}
@@ -75,13 +72,13 @@ func (c *config) Create(ctx context.Context, customer *models.Customer) error {
 		return err
 	}
 	customer.Sanitize()
-	err := c.Find(ctx, customer)
+	err := r.Find(ctx, customer)
 	if err == mongo.ErrNoDocuments {
-		_, err = c.DB.Collection(c.Collection).InsertOne(ctx, customer)
+		_, err = r.DB.Collection(CUSTOMERSCOLLECTION).InsertOne(ctx, customer)
 		if err != nil {
 			return err
 		}
-		_, err = c.DB.Collection("roles").InsertOne(ctx, customer.Roles)
+		_, err = r.DB.Collection(ROLESCOLLECTION).InsertOne(ctx, customer.Roles)
 		if err != nil {
 			return err
 		}

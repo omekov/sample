@@ -1,16 +1,18 @@
 package apiserver
 
 import (
-	"log"
+	"context"
 
 	"github.com/go-redis/redis"
-	"github.com/omekov/sample/config"
+	"github.com/omekov/sample/configs"
 	"github.com/omekov/sample/internal/apiserver/handlers"
 	"github.com/omekov/sample/internal/apiserver/stores"
-	"github.com/omekov/sample/internal/apiserver/stores/cache"
+	"github.com/omekov/sample/internal/apiserver/stores/caches/redisdb"
+	"github.com/omekov/sample/internal/apiserver/stores/jwt"
 	"github.com/omekov/sample/internal/apiserver/stores/mongodb"
+	"github.com/pkg/errors"
 
-	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 )
 
 // Run ...
@@ -20,50 +22,53 @@ func Run() {
 	}
 }
 
-// mongoDBConnect - методе подключаемся к mongodb и создаем ему базу и документы, также возвращаем методы по клиенту
-func mongoDBConnect() (mongodb.CustomerRepository, error) {
-	dbClient, err := mongodb.NewClient(config.GetMongoConfig())
+// mongoDBConnect -
+func mongoDBConnect(cnf *configs.Mongo) (mongodb.Database, error) {
+	dbClient, err := mongodb.NewClient(cnf)
 	if err != nil {
 		return nil, err
 	}
 	if err = dbClient.Connect(); err != nil {
 		return nil, err
 	}
-	db := mongodb.NewDatabase(config.GetMongoConfig(), dbClient)
-	customer := mongodb.NewCustomerRepository(
-		db,
-		config.GetMongoConfig().Collections.Customer,
-	)
-	return customer, nil
+	if err = dbClient.Ping(context.TODO()); err != nil {
+		return nil, err
+	}
+	log.Infof("MongoDB PING - %s\n", "PONG")
+	db := mongodb.NewDatabase(cnf, dbClient)
+	return db, nil
 }
 
 // redisConnect - методе подключаемся к redis и кидаем пинг
-func redisConnect() (*redis.Client, error) {
-	return cache.NewClient(config.GetRedisConfig())
+func redisConnect(cnf *configs.Redis) (*redis.Client, error) {
+	return redisdb.NewClient(cnf)
 }
 
 func app() error {
-	config.Init(".env.prod")
-	redisClient, err := redisConnect()
+	env := configs.NewENV()
+	redisClient, err := redisConnect(env.Caches.Redis)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "Redis")
 	}
-	customer, err := mongoDBConnect()
+	mongoDB, err := mongoDBConnect(env.Databases.Mongo)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "Mongodb")
 	}
 	server := handlers.Server{
-		Config: handlers.ConfigureRouter(),
-		Logger: logrus.New(),
+		Config: handlers.ConfigureRouter(env.Port),
+		Logger: log.New(),
 		Store: &stores.Store{
 			Databases: stores.Databases{
-				MongoDB: mongodb.MongoDBRepositories{
-					Customer: customer,
+				Mongo: mongodb.Repository{
+					DB: mongoDB,
 				},
 			},
-			JWT: config.GetJWTConfig(),
+			JWT: &jwt.Config{
+				AccessTokenSecret:  []byte(env.JWT.Access),
+				RefreshTokenSecret: []byte(env.JWT.Refresh),
+			},
 			Caches: stores.Caches{
-				RedisClient: cache.Config{
+				RedisClient: redisdb.Config{
 					Client: redisClient,
 				},
 			},

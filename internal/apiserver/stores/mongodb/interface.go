@@ -3,6 +3,7 @@ package mongodb
 import (
 	"context"
 
+	"github.com/omekov/sample/configs"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -33,6 +34,7 @@ type SingleResult interface {
 type Client interface {
 	Database(string) Database
 	Connect() error
+	Ping(context.Context) error
 	StartSession() (mongo.Session, error)
 }
 
@@ -55,21 +57,21 @@ type mongoSession struct {
 }
 
 // NewClient ...
-func NewClient(cnf *MongoConfig) (Client, error) {
+func NewClient(cnf *configs.Mongo) (Client, error) {
 	clientOptions := options.Client().SetAuth(
 		options.Credential{
 			Username:   cnf.Username,
 			Password:   cnf.Password,
-			AuthSource: cnf.DatabaseName,
-		}).ApplyURI(cnf.URL).SetRetryWrites(false)
+			AuthSource: cnf.Name,
+		}).ApplyURI(cnf.URI).SetRetryWrites(false)
 	c, err := mongo.NewClient(clientOptions)
 	return &mongoClient{cl: c}, err
 
 }
 
 // NewDatabase ...
-func NewDatabase(cnf *MongoConfig, client Client) Database {
-	return client.Database(cnf.DatabaseName)
+func NewDatabase(cnf *configs.Mongo, client Client) Database {
+	return client.Database(cnf.Name)
 }
 
 func (mc *mongoClient) Database(dbName string) Database {
@@ -83,14 +85,13 @@ func (mc *mongoClient) StartSession() (mongo.Session, error) {
 }
 
 func (mc *mongoClient) Connect() error {
-	// mongo client does not use context on connect method. There is a ticket
-	// with a request to deprecate this functionality and another one with
-	// explanation why it could be useful in synchronous requests.
-	// https://jira.mongodb.org/browse/GODRIVER-1031
-	// https://jira.mongodb.org/browse/GODRIVER-979
+
 	return mc.cl.Connect(nil)
 }
 
+func (mc *mongoClient) Ping(ctx context.Context) error {
+	return mc.cl.Ping(ctx, nil)
+}
 func (md *mongoDatabase) Collection(colName string) Collection {
 	collection := md.db.Collection(colName)
 	return &mongoCollection{coll: collection}

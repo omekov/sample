@@ -17,8 +17,10 @@ require (
 	github.com/klauspost/compress v1.10.11 // indirect
 	github.com/mailru/easyjson v0.7.6 // indirect
 	github.com/micro/go-micro/v2 v2.9.1 // indirect
+	github.com/pkg/errors v0.9.1
 	github.com/segmentio/kafka-go v0.4.8 // indirect
 	github.com/sirupsen/logrus v1.6.0
+	github.com/streadway/amqp v1.0.0
 	github.com/stretchr/objx v0.3.0 // indirect
 	github.com/stretchr/testify v1.6.1
 	github.com/stripe/stripe-go v70.15.0+incompatible // indirect
