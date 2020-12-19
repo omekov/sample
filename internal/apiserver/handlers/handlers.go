@@ -7,6 +7,7 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/omekov/sample/internal/apiserver/models"
 	"github.com/omekov/sample/internal/apiserver/stores/jwt"
 )
@@ -25,47 +26,44 @@ import (
 // @Failure 404 {object} models.Error
 // @Failure 500 {object} models.Error
 // @Router /signin [post]
-func (s *Server) signIn() http.HandlerFunc {
+func (s *Server) signIn(w http.ResponseWriter, r *http.Request) {
 	var credential *models.Credential
-	return func(w http.ResponseWriter, r *http.Request) {
-		if err := json.NewDecoder(r.Body).Decode(&credential); err != nil {
-			s.error(w, r, http.StatusBadRequest, err)
-			return
-		}
-		customer := &models.Customer{
-			Username:    credential.Username,
-			ReleaseDate: time.Now(),
-		}
-		err := s.Store.Databases.Mongo.Customer.FindAndUpdate(r.Context(), customer)
-		if err != nil {
-			s.error(w, r, http.StatusForbidden, errIncorrectEmailPassword)
-			return
-		}
-		err = customer.ComparePassword(credential.Password)
-		if err != nil {
-			s.error(w, r, http.StatusForbidden, errIncorrectEmailPassword)
-			return
-		}
-		accToken, err := s.Store.JWT.NewAccessJWT(customer)
-		if err != nil {
-			s.error(w, r, http.StatusInternalServerError, err)
-			return
-		}
-		refToken, err := s.Store.JWT.NewRefreshJWT(customer)
-		if err != nil {
-			s.error(w, r, http.StatusInternalServerError, err)
-			return
-		}
-		if err := s.Store.Caches.RedisClient.SetCustomerIDAndRefreshToken(customer, refToken); err != nil {
-			s.error(w, r, http.StatusInternalServerError, err)
-			return
-		}
-		s.respond(w, r, http.StatusOK, models.Token{
-			AccessToken:  accToken,
-			Refreshtoken: refToken,
-		})
+	if err := json.NewDecoder(r.Body).Decode(&credential); err != nil {
+		s.error(w, r, http.StatusBadRequest, err)
 		return
 	}
+	customer := &models.Customer{
+		Username:    credential.Username,
+		ReleaseDate: time.Now(),
+	}
+	err := s.Store.CustomerRepo.FindAndUpdate(r.Context(), customer)
+	if err != nil {
+		s.error(w, r, http.StatusForbidden, errIncorrectEmailPassword)
+		return
+	}
+	err = customer.ComparePassword(credential.Password)
+	if err != nil {
+		s.error(w, r, http.StatusForbidden, errIncorrectEmailPassword)
+		return
+	}
+	accToken, err := s.Store.JWT.NewAccessJWT(customer)
+	if err != nil {
+		s.error(w, r, http.StatusInternalServerError, err)
+		return
+	}
+	refToken, err := s.Store.JWT.NewRefreshJWT(customer)
+	if err != nil {
+		s.error(w, r, http.StatusInternalServerError, err)
+		return
+	}
+	if err := s.Store.Redis.SetCustomerIDAndRefreshToken(customer, refToken); err != nil {
+		s.error(w, r, http.StatusInternalServerError, err)
+		return
+	}
+	s.respond(w, r, http.StatusOK, models.Token{
+		AccessToken:  accToken,
+		Refreshtoken: refToken,
+	})
 }
 
 // signUp godoc
@@ -82,24 +80,21 @@ func (s *Server) signIn() http.HandlerFunc {
 // @Failure 404 {object} models.Error
 // @Failure 500 {object} models.Error
 // @Router /signup [post]
-func (s *Server) signUp() http.HandlerFunc {
+func (s *Server) signUp(w http.ResponseWriter, r *http.Request) {
 	var customer *models.Customer
-	return func(w http.ResponseWriter, r *http.Request) {
-		if err := json.NewDecoder(r.Body).Decode(&customer); err != nil {
-			s.error(w, r, http.StatusBadRequest, err)
-			return
-		}
-		if err := s.Store.Databases.Mongo.Customer.FindAndCreate(r.Context(), customer); err != nil {
-			s.error(w, r, http.StatusInternalServerError, err)
-			return
-		}
-		// if err := rabbitmq.Send(customer, uuid.New()); err != nil {
-		// 	s.error(w, r, http.StatusInternalServerError, err)
-		// 	return
-		// }
-		s.respond(w, r, http.StatusCreated, nil)
+	if err := json.NewDecoder(r.Body).Decode(&customer); err != nil {
+		s.error(w, r, http.StatusBadRequest, err)
 		return
 	}
+	if err := s.Store.CustomerRepo.FindAndCreate(r.Context(), customer); err != nil {
+		s.error(w, r, http.StatusInternalServerError, err)
+		return
+	}
+	if err := s.Store.RabbitMQ.Send(customer, uuid.New()); err != nil {
+		s.error(w, r, http.StatusInternalServerError, err)
+		return
+	}
+	s.respond(w, r, http.StatusCreated, nil)
 }
 
 // whoami godoc
@@ -117,10 +112,8 @@ func (s *Server) signUp() http.HandlerFunc {
 // @Failure 500 {object} models.Error
 // @Security ApiKeyAuth
 // @Router /api/whoami [get]
-func (s *Server) whoami() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		s.respond(w, r, http.StatusOK, r.Context().Value(ctxKeyUser).(*jwt.Claims))
-	}
+func (s *Server) whoAmi(w http.ResponseWriter, r *http.Request) {
+	s.respond(w, r, http.StatusOK, r.Context().Value(ctxKeyUser).(*jwt.Claims))
 }
 
 // refresh godoc
@@ -137,37 +130,32 @@ func (s *Server) whoami() http.HandlerFunc {
 // @Failure 404 {object} models.Error
 // @Failure 500 {object} models.Error
 // @Router /refresh [post]
-func (s *Server) refreshToken() http.HandlerFunc {
+func (s *Server) refreshToken(w http.ResponseWriter, r *http.Request) {
 	var token *models.Token
-	return func(w http.ResponseWriter, r *http.Request) {
-		if err := json.NewDecoder(r.Body).Decode(&token); err != nil {
-			s.error(w, r, http.StatusBadRequest, err)
-			return
-		}
-		newToken, err := s.Store.JWT.GetRefreshJWT(token.Refreshtoken)
-		if err != nil {
-			s.error(w, r, http.StatusInternalServerError, err)
-			return
-		}
-		s.respond(w, r, http.StatusOK, newToken)
+	if err := json.NewDecoder(r.Body).Decode(&token); err != nil {
+		s.error(w, r, http.StatusBadRequest, err)
+		return
 	}
+	newToken, err := s.Store.JWT.GetRefreshJWT(token.Refreshtoken)
+	if err != nil {
+		s.error(w, r, http.StatusInternalServerError, err)
+		return
+	}
+	s.respond(w, r, http.StatusOK, newToken)
 }
 
-func (s *Server) shutdown() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		status := models.ServerStatus{
-			ShutdownStatus: "On",
-		}
-		s.respond(w, r, http.StatusOK, status)
+func (s *Server) shutdown(w http.ResponseWriter, r *http.Request) {
+	status := models.ServerStatus{
+		ShutdownStatus: "On",
+	}
+	s.respond(w, r, http.StatusOK, status)
 
-		if !atomic.CompareAndSwapUint32(&s.Config.ReqCount, 0, 1) {
-			log.Printf("Shutdown through API call in progress...")
-			return
-		}
-
-		go func() {
-			s.Config.ShutdownReq <- true
-		}()
+	if !atomic.CompareAndSwapUint32(&s.ReqCount, 0, 1) {
+		log.Printf("Shutdown through API call in progress...")
+		return
 	}
 
+	go func() {
+		s.ShutdownReq <- true
+	}()
 }

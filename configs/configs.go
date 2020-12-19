@@ -68,7 +68,7 @@ type JWT struct {
 // NewENV ...
 func NewENV() *ENV {
 	once.Do(func() {
-		pathENV := "./deployments/.prod.env"
+		pathENV := "./deployments/.env"
 		if _, err := os.Stat(pathENV); !os.IsNotExist(err) {
 			if err := godotenv.Load(pathENV); err != nil {
 				log.Fatal("Error loading .env file")
@@ -98,7 +98,7 @@ func NewENV() *ENV {
 		Queues: &Queues{
 			RabbitMQ: &RabbitMQ{
 				URI:           GetENVString("RABBITMQ_URI"),
-				VHost:         GetENVString("RABBITMQ_VHOST", "/"),
+				VHost:         GetENVString("RABBITMQ_VHOST", ""),
 				Exchange:      GetENVString("RABBITMQ_EXCHANGE"),
 				Queue:         GetENVString("RABBITMQ_QUEUE"),
 				PrefetchCount: GetENVInt("RABBITMQ_PREFETCH_COUNT", 5),

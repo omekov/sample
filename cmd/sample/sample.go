@@ -9,7 +9,7 @@ import "github.com/omekov/sample/internal/apiserver"
 // @contact.name API Support
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
-// @host localhost:9090
+// @host localhost
 // @BasePath /
 // @securitydefinitions.apikey ApiKeyAuth
 // @in header

@@ -117,7 +117,7 @@ func (s *Server) error(w http.ResponseWriter, r *http.Request, code int, err err
 	}
 }
 
-func (s *Server) setHeader(next http.Handler) http.Handler {
+func (s *Server) setHeaderAccessControlAllow(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Headers", "*")
 		w.Header().Set("Access-Control-Allow-Origin", "*")

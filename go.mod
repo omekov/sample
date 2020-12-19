@@ -5,6 +5,7 @@ go 1.13
 require (
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
 	github.com/aws/aws-sdk-go v1.34.17 // indirect
+	github.com/coreos/etcd v3.3.18+incompatible
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-openapi/spec v0.19.12 // indirect
 	github.com/go-ozzo/ozzo-validation v3.6.0+incompatible
@@ -33,5 +34,6 @@ require (
 	golang.org/x/net v0.0.0-20201031054903-ff519b6c9102 // indirect
 	golang.org/x/text v0.3.4 // indirect
 	golang.org/x/tools v0.0.0-20201102021907-8860a70d10e6 // indirect
+	google.golang.org/appengine v1.6.6
 	gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22 // indirect
 )

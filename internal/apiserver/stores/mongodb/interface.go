@@ -34,6 +34,7 @@ type SingleResult interface {
 type Client interface {
 	Database(string) Database
 	Connect() error
+	DisConnect(context.Context) error
 	Ping(context.Context) error
 	StartSession() (mongo.Session, error)
 }
@@ -66,12 +67,15 @@ func NewClient(cnf *configs.Mongo) (Client, error) {
 		}).ApplyURI(cnf.URI).SetRetryWrites(false)
 	c, err := mongo.NewClient(clientOptions)
 	return &mongoClient{cl: c}, err
-
 }
 
 // NewDatabase ...
-func NewDatabase(cnf *configs.Mongo, client Client) Database {
-	return client.Database(cnf.Name)
+func NewDatabase(dbName string, client Client) Database {
+	return client.Database(dbName)
+}
+
+func (mc *mongoClient) DisConnect(ctx context.Context) error {
+	return mc.cl.Disconnect(ctx)
 }
 
 func (mc *mongoClient) Database(dbName string) Database {

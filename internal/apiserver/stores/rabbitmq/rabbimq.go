@@ -118,4 +118,3 @@ package rabbitmq
 // 		log.Printf("RMQ Set PrefetchCount=%d", rmq.config.PrefetchCount)
 // 	}
 // }
-// */

@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -20,57 +19,38 @@ import (
 
 // Server ...
 type Server struct {
-	Config *Config
 	Logger *logrus.Logger
 	Store  *stores.Store
-}
-
-// Config ...
-type Config struct {
 	Router *mux.Router
 	http.Server
 	ShutdownReq chan bool
 	ReqCount    uint32
 }
 
-func (c *Config) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	c.Router.ServeHTTP(w, r)
-}
-
-// ConfigureRouter ...
-func ConfigureRouter(port int) *Config {
-	return &Config{
-		Router: mux.NewRouter(),
-		Server: http.Server{
-			Addr:         fmt.Sprintf(":%v", port),
-			ReadTimeout:  10 * time.Second,
-			WriteTimeout: 10 * time.Second,
-		},
-		ShutdownReq: make(chan bool),
-	}
+func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	s.Router.ServeHTTP(w, r)
 }
 
 // Handlers ...
 func (s *Server) handlers() *mux.Router {
-	s.Config.Router.Use(s.setRequestID)
-	s.Config.Router.Use(s.setHeader)
-	s.Config.Router.Use(mux.CORSMethodMiddleware(s.Config.Router))
-	s.Config.Router.Use(s.logRequest)
-	s.Config.Router.HandleFunc("/signin", s.signIn()).Methods(http.MethodPost, http.MethodOptions)
-	s.Config.Router.HandleFunc("/signup", s.signUp()).Methods(http.MethodPost, http.MethodOptions)
-	s.Config.Router.HandleFunc("/refresh", s.refreshToken()).Methods(http.MethodPost, http.MethodOptions)
-	s.Config.Router.HandleFunc("/shutdown", s.shutdown()).Methods(http.MethodGet, http.MethodOptions)
-	private := s.Config.Router.PathPrefix("/api").Subrouter()
+	s.Router.Use(s.setRequestID)
+	s.Router.Use(s.setHeaderAccessControlAllow)
+	s.Router.Use(s.logRequest)
+	s.Router.HandleFunc("/signin", s.signIn).Methods(http.MethodPost, http.MethodOptions)
+	s.Router.HandleFunc("/signup", s.signUp).Methods(http.MethodPost, http.MethodOptions)
+	s.Router.HandleFunc("/refresh", s.refreshToken).Methods(http.MethodPost, http.MethodOptions)
+	s.Router.HandleFunc("/shutdown", s.shutdown).Methods(http.MethodGet, http.MethodOptions)
+	private := s.Router.PathPrefix("/api").Subrouter()
 	private.Use(s.authenticateUser)
-	private.HandleFunc("/whoami", s.whoami()).Methods(http.MethodGet, http.MethodOptions)
+	private.HandleFunc("/whoami", s.whoAmi).Methods(http.MethodGet, http.MethodOptions)
 
 	// Swagger
-	s.Config.Router.PathPrefix("/swagger").Handler(httpSwagger.WrapHandler)
-	return s.Config.Router
+	s.Router.PathPrefix("/swagger").Handler(httpSwagger.WrapHandler)
+	return s.Router
 }
 
 func (s *Server) waitShutdown() {
-	signalChan := make(chan os.Signal, 1)
+	signalChan := make(chan os.Signal)
 	signal.Notify(
 		signalChan,
 		syscall.SIGHUP,  // kill -SIGHUP XXXX
@@ -81,7 +61,7 @@ func (s *Server) waitShutdown() {
 	select {
 	case sig := <-signalChan:
 		log.Printf("Shutdown request (signal: %v)", sig)
-	case sig := <-s.Config.ShutdownReq:
+	case sig := <-s.ShutdownReq:
 		log.Printf("Shutdown request (/shutdown %v)", sig)
 	}
 
@@ -91,7 +71,7 @@ func (s *Server) waitShutdown() {
 	defer cancel()
 
 	//shutdown the server
-	if err := s.Config.Shutdown(ctx); err != nil {
+	if err := s.Shutdown(ctx); err != nil {
 		log.Printf("shutdown error: %v\n", err)
 		defer os.Exit(1)
 		return
@@ -101,11 +81,10 @@ func (s *Server) waitShutdown() {
 
 // Run ...
 func (s *Server) Run() {
-	server := ConfigureRouter(9090)
-	server.Handler = s.handlers()
+	s.Handler = s.handlers()
 	done := make(chan bool)
 	go func() {
-		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		if err := s.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("Failed to initialize server: %v\n", err)
 		}
 		done <- true
