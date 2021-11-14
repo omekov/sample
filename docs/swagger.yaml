@@ -39,10 +39,9 @@ definitions:
         example: jwt-token
         type: string
     type: object
-host: localhost:9090
+host: localhost
 info:
   contact:
-    email: umekovazamat@gmail.com
     name: API Support
   description: This is a sample service for managment
   license:

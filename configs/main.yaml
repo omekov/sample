@@ -1,0 +1,4 @@
+mail: 
+  email: "support@azamat.dev"
+  message: "Welcome to Sample"
+  host: "smtp.gmail.com:587"

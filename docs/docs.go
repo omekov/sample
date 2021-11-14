@@ -20,8 +20,7 @@ var doc = `{
         "title": "{{.Title}}",
         "termsOfService": "http://swagger.io/terms/",
         "contact": {
-            "name": "API Support",
-            "email": "umekovazamat@gmail.com"
+            "name": "API Support"
         },
         "license": {
             "name": "Apache 2.0",
@@ -362,7 +361,7 @@ type swaggerInfo struct {
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = swaggerInfo{
 	Version:     "2.0",
-	Host:        "localhost:9090",
+	Host:        "localhost",
 	BasePath:    "/",
 	Schemes:     []string{},
 	Title:       "Sample API",

@@ -1,13 +1,6 @@
 package handlers_test
 
-import (
-	"fmt"
-	"net/http"
-	"testing"
-
-	"github.com/omekov/sample/internal/apiserver/models"
-)
-
+/*
 func TestHadler_SignIn(t *testing.T) {
 	c := models.TestCredential(t)
 	testCases := []struct {
@@ -56,3 +49,5 @@ func TestHadler_SignIn(t *testing.T) {
 	// 	})
 	// }
 }
+
+ */
