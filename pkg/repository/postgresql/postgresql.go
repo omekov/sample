@@ -16,10 +16,6 @@ type Manager struct {
 	maxConnectAttempts  int
 }
 
-type Repositories struct {
-	User Userer
-}
-
 func NewManager(uri string, logrus *logrus.Logger) *Manager {
 	pgxConfig, err := pgx.ParseConfig(uri)
 	if err != nil {
@@ -59,6 +55,7 @@ func (m *Manager) GetConnection(ctx context.Context) *pgx.Conn {
 				if attempt >= m.maxConnectAttempts {
 					m.logger.Warnf("connection failed after %d attempt\n", attempt)
 				}
+
 				attempt++
 				m.logger.Infof("reconnecting...")
 
@@ -70,10 +67,4 @@ func (m *Manager) GetConnection(ctx context.Context) *pgx.Conn {
 	}
 
 	return m.conn
-}
-
-func NewRepositories(conn *pgx.Conn) *Repositories {
-	return &Repositories{
-		User: NewUser(conn),
-	}
 }

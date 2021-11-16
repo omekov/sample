@@ -1,42 +1,22 @@
 basePath: /
 definitions:
-  models.Credential:
+  http.Credential:
     properties:
       password:
-        example: '-'
         type: string
       username:
-        example: example@gmail.com
         type: string
     type: object
-  models.Customer:
-    properties:
-      firstname:
-        example: Adam
-        type: string
-      password:
-        example: '-'
-        type: string
-      repeatPassword:
-        example: "123456"
-        type: string
-      username:
-        example: example@gmail.com
-        type: string
-    type: object
-  models.Error:
+  http.Error:
     properties:
       error:
-        example: error
         type: string
     type: object
-  models.Token:
+  http.Token:
     properties:
       accessToken:
-        example: jwt-token
         type: string
       refreshToken:
-        example: jwt-token
         type: string
     type: object
 host: localhost
@@ -51,85 +31,6 @@ info:
   title: Sample API
   version: "2.0"
 paths:
-  /api/whoami:
-    get:
-      consumes:
-      - application/json
-      description: whoami input header Authorization Bearer <token>, return parse in Claims
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 'Customer":{"username": "example@gmail.com", "firstname": "Adam" },"exp": 1602666876}'
-          schema:
-            type: string
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/models.Error'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/models.Error'
-        "403":
-          description: Forbidden
-          schema:
-            $ref: '#/definitions/models.Error'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/models.Error'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/models.Error'
-      security:
-      - ApiKeyAuth: []
-      summary: Parse token
-      tags:
-      - sign
-  /refresh:
-    post:
-      consumes:
-      - application/json
-      description: http body refreshtoken sign new refresh token
-      parameters:
-      - description: Refresh auth
-        in: body
-        name: refresh
-        required: true
-        schema:
-          $ref: '#/definitions/models.Token'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.Token'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/models.Error'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/models.Error'
-        "403":
-          description: Forbidden
-          schema:
-            $ref: '#/definitions/models.Error'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/models.Error'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/models.Error'
-      summary: Refresh token
-      tags:
-      - sign
   /signin:
     post:
       consumes:
@@ -141,77 +42,31 @@ paths:
         name: signin
         required: true
         schema:
-          $ref: '#/definitions/models.Credential'
+          $ref: '#/definitions/http.Credential'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.Token'
+            $ref: '#/definitions/http.Token'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/models.Error'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/models.Error'
-        "403":
-          description: Forbidden
-          schema:
-            $ref: '#/definitions/models.Error'
+            $ref: '#/definitions/http.Error'
         "404":
-          description: Not Found
+          description: Bad Request
           schema:
-            $ref: '#/definitions/models.Error'
+            $ref: '#/definitions/http.Error'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/models.Error'
+            $ref: '#/definitions/http.Error'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/http.Error'
       summary: Sign auth
-      tags:
-      - sign
-  /signup:
-    post:
-      consumes:
-      - application/json
-      description: Sign Up new customer the input paylod
-      parameters:
-      - description: SignUp customer
-        in: body
-        name: signup
-        required: true
-        schema:
-          $ref: '#/definitions/models.Customer'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: ok
-          schema:
-            type: string
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/models.Error'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/models.Error'
-        "403":
-          description: Forbidden
-          schema:
-            $ref: '#/definitions/models.Error'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/models.Error'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/models.Error'
-      summary: Sign Up new customer
       tags:
       - sign
 securityDefinitions:

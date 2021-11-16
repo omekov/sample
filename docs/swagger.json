@@ -16,128 +16,6 @@
     "host": "localhost",
     "basePath": "/",
     "paths": {
-        "/api/whoami": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "whoami input header Authorization Bearer \u003ctoken\u003e, return parse in Claims",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "sign"
-                ],
-                "summary": "Parse token",
-                "responses": {
-                    "200": {
-                        "description": "Customer\":{\"username\": \"example@gmail.com\", \"firstname\": \"Adam\" },\"exp\": 1602666876}",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/models.Error"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/models.Error"
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "schema": {
-                            "$ref": "#/definitions/models.Error"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/models.Error"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/models.Error"
-                        }
-                    }
-                }
-            }
-        },
-        "/refresh": {
-            "post": {
-                "description": "http body refreshtoken sign new refresh token",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "sign"
-                ],
-                "summary": "Refresh token",
-                "parameters": [
-                    {
-                        "description": "Refresh auth",
-                        "name": "refresh",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.Token"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/models.Token"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/models.Error"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/models.Error"
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "schema": {
-                            "$ref": "#/definitions/models.Error"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/models.Error"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/models.Error"
-                        }
-                    }
-                }
-            }
-        },
         "/signin": {
             "post": {
                 "description": "Sign auth client the input paylod",
@@ -158,7 +36,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.Credential"
+                            "$ref": "#/definitions/http.Credential"
                         }
                     }
                 ],
@@ -166,101 +44,31 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.Token"
+                            "$ref": "#/definitions/http.Token"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/models.Error"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/models.Error"
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "schema": {
-                            "$ref": "#/definitions/models.Error"
+                            "$ref": "#/definitions/http.Error"
                         }
                     },
                     "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/models.Error"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/models.Error"
-                        }
-                    }
-                }
-            }
-        },
-        "/signup": {
-            "post": {
-                "description": "Sign Up new customer the input paylod",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "sign"
-                ],
-                "summary": "Sign Up new customer",
-                "parameters": [
-                    {
-                        "description": "SignUp customer",
-                        "name": "signup",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.Customer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "ok",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/models.Error"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/models.Error"
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "schema": {
-                            "$ref": "#/definitions/models.Error"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/models.Error"
+                            "$ref": "#/definitions/http.Error"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/models.Error"
+                            "$ref": "#/definitions/http.Error"
+                        }
+                    },
+                    "default": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/http.Error"
                         }
                     }
                 }
@@ -268,59 +76,33 @@
         }
     },
     "definitions": {
-        "models.Credential": {
+        "http.Credential": {
             "type": "object",
             "properties": {
                 "password": {
-                    "type": "string",
-                    "example": "-"
+                    "type": "string"
                 },
                 "username": {
-                    "type": "string",
-                    "example": "example@gmail.com"
+                    "type": "string"
                 }
             }
         },
-        "models.Customer": {
-            "type": "object",
-            "properties": {
-                "firstname": {
-                    "type": "string",
-                    "example": "Adam"
-                },
-                "password": {
-                    "type": "string",
-                    "example": "-"
-                },
-                "repeatPassword": {
-                    "type": "string",
-                    "example": "123456"
-                },
-                "username": {
-                    "type": "string",
-                    "example": "example@gmail.com"
-                }
-            }
-        },
-        "models.Error": {
+        "http.Error": {
             "type": "object",
             "properties": {
                 "error": {
-                    "type": "string",
-                    "example": "error"
+                    "type": "string"
                 }
             }
         },
-        "models.Token": {
+        "http.Token": {
             "type": "object",
             "properties": {
                 "accessToken": {
-                    "type": "string",
-                    "example": "jwt-token"
+                    "type": "string"
                 },
                 "refreshToken": {
-                    "type": "string",
-                    "example": "jwt-token"
+                    "type": "string"
                 }
             }
         }

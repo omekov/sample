@@ -3,19 +3,9 @@ package http
 import (
 	"encoding/json"
 	"net/http"
+
+	"github.com/omekov/sample/internal/model"
 )
-
-// Credential ...
-type Credential struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-}
-
-// Token ...
-type Token struct {
-	AccessToken  string `json:"accessToken"`
-	Refreshtoken string `json:"refreshToken"`
-}
 
 // signIn godoc
 // @Summary Sign auth
@@ -23,28 +13,24 @@ type Token struct {
 // @Tags sign
 // @Accept  json
 // @Produce  json
-// @Param signin body models.Credential true "SignIn auth"
-// @Success 200 {object} models.Token
-// @Failure 400,404 {object} models.Error
-// @Failure 500 {object} models.Error
-// @Failure default {object} models.Error
+// @Param signin body model.Credential true "SignIn auth"
+// @Success 200 {object} model.Token
+// @Failure 400,404 {object} model.Error
+// @Failure 500 {object} model.Error
+// @Failure default {object} model.Error
 // @Router /signin [post]
 func (s *Server) signIn(w http.ResponseWriter, r *http.Request) {
-	var credential *Credential
+	var credential *model.Credential
 	if err := json.NewDecoder(r.Body).Decode(&credential); err != nil {
 		s.error(w, r, http.StatusBadRequest, err)
 		return
 	}
-	// required username and password 400
-	// email validation 400
-	// email check 500
-	// compare password 400
-	// return accsess token 500
-	s.usecase.Auth.FindByEmail(r.Context(), credential)
-	s.respond(w, r, http.StatusOK, Token{
-		AccessToken:  "accToken",
-		Refreshtoken: "refToken",
-	})
+	token, err := s.UseCase.Auth.SignIn(r.Context(), credential)
+	if err != nil {
+		s.error(w, r, http.StatusInternalServerError, err)
+		return
+	}
+	s.respond(w, r, http.StatusOK, token)
 }
 
 /*

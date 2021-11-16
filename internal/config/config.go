@@ -66,8 +66,10 @@ type RabbitMQ struct {
 }
 
 type JWT struct {
-	Access  string
-	Refresh string
+	AccessSecret  string
+	RefreshSecret string
+	LifeTimeAccess int
+	LifeTimeRefresh int
 }
 
 // Get ...
@@ -110,8 +112,8 @@ func Get() *ENV {
 			},
 		},
 		JWT: &JWT{
-			Access:  GetENVString("ACCESS_TOKEN_SECRET", "ACCESS_TOKEN_SECRET"),
-			Refresh: GetENVString("REFRESH_TOKEN_SECRET", "REFRESH_TOKEN_SECRET"),
+			AccessSecret:  GetENVString("ACCESS_TOKEN_SECRET", "ACCESS_TOKEN_SECRET"),
+			RefreshSecret: GetENVString("REFRESH_TOKEN_SECRET", "REFRESH_TOKEN_SECRET"),
 		},
 	}
 }

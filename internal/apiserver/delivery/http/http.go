@@ -25,10 +25,6 @@ type Server struct {
 	ReqCount    uint32
 }
 
-type Error struct {
-	Error string `json:"error"`
-}
-
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s.Router.ServeHTTP(w, r)
 }

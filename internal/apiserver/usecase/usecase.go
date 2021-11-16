@@ -12,9 +12,9 @@ type UseCase struct {
 }
 
 func NewUseCase(cfg *config.ENV, store *stores.Store) *UseCase {
-	repo := postgresql.NewRepositories(store.PostgresConn)
-	jwt := jwt.NewJWT(*cfg.JWT)
+	userRepo := postgresql.NewUser(store.PostgresConn)
+	_jwt := jwt.NewJWT(*cfg.JWT)
 	return &UseCase{
-		Auth: NewAuth(repo, _jwt),
+		Auth: NewAuth(userRepo, _jwt),
 	}
 }

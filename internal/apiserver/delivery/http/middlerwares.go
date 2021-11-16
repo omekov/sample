@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/omekov/sample/internal/model"
 	"github.com/omekov/sample/pkg/contant"
 	"github.com/sirupsen/logrus"
 )
@@ -42,7 +43,7 @@ func (s *Server) authenticateUser(next http.Handler) http.Handler {
 			return
 		}
 
-		u, err := s.Store.JWT.GetClaims(splitted[1])
+		u, err := s.UseCase.Auth.GetClaims(splitted[1])
 		if err != nil {
 			s.error(w, r, http.StatusInternalServerError, err)
 			return
@@ -105,9 +106,9 @@ func (s *Server) error(w http.ResponseWriter, r *http.Request, code int, err err
 	})
 	logger.Infof("%s", err.Error())
 	if code == http.StatusForbidden {
-		s.respond(w, r, code, Error{Error: contant.ErrIncorrectEmailPassword.Error()})
+		s.respond(w, r, code, model.Error{Error: contant.ErrIncorrectEmailPassword.Error()})
 	} else {
-		s.respond(w, r, code, Error{Error: err.Error()})
+		s.respond(w, r, code, model.Error{Error: err.Error()})
 	}
 }
 

@@ -2,8 +2,12 @@ package postgresql
 
 import (
 	"context"
+	"strconv"
+
+	"github.com/google/uuid"
 
 	"github.com/jackc/pgx/v4"
+	"github.com/omekov/sample/pkg/contant"
 	"github.com/omekov/sample/pkg/domain"
 )
 
@@ -19,9 +23,9 @@ func NewUser(conn *pgx.Conn) *UserRepo {
 
 type Userer interface {
 	Create(ctx context.Context, user domain.User) error
-	GetByID(ctx context.Context, id uint) (domain.User, error)
+	GetByID(ctx context.Context, id uuid.UUID) (domain.User, error)
 	GetByName(ctx context.Context, name string) (domain.User, error)
-	GetAll(ctx context.Context, filter domain.UserFilter) ([]domain.User, error)
+	GetAll(ctx context.Context, filter map[string]string) ([]domain.User, error)
 }
 
 func (r UserRepo) Create(ctx context.Context, user domain.User) error {
@@ -33,7 +37,7 @@ func (r UserRepo) Create(ctx context.Context, user domain.User) error {
 	return r.conn.QueryRow(ctx, userQuery, args...).Scan(&user.ID)
 }
 
-func (r UserRepo) GetByID(ctx context.Context, id uint) (domain.User, error) {
+func (r UserRepo) GetByID(ctx context.Context, id uuid.UUID) (domain.User, error) {
 	user := domain.User{ID: id}
 	sql, args, err := user.SelectOneScript()
 	if err != nil {
@@ -61,18 +65,30 @@ func (r UserRepo) GetByName(ctx context.Context, name string) (domain.User, erro
 	return user, nil
 }
 
-func (r UserRepo) GetAll(ctx context.Context, filter domain.UserFilter) ([]domain.User, error) {
+func (r UserRepo) GetAll(ctx context.Context, filter map[string]string) ([]domain.User, error) {
 	users := make([]domain.User, 0)
 	user := domain.User{}
 
-	sql, args, err := user.SelectScript(filter.Page)
+	filterPageStr, ok := filter["Page"]
+	if ok {
+		return users, contant.ErrFilterKeyPageIsExist
+	}
+
+	filterPage, err := strconv.Atoi(filterPageStr)
+	if err != nil {
+		return users, contant.ErrStconvAtoi("filter.Page", err)
+	}
+
+	sql, args, err := user.SelectScript(filterPage)
 	if err != nil {
 		return users, err
 	}
+
 	userRows, err := r.conn.Query(ctx, sql, args...)
 	if err != nil {
 		return users, err
 	}
+
 	for userRows.Next() {
 		user = domain.User{}
 		if err := userRows.Scan(
@@ -87,5 +103,6 @@ func (r UserRepo) GetAll(ctx context.Context, filter domain.UserFilter) ([]domai
 		}
 		users = append(users, user)
 	}
+
 	return users, nil
 }

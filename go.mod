@@ -25,7 +25,6 @@ require (
 	github.com/streadway/amqp v1.0.0
 	github.com/swaggo/http-swagger v0.0.0-20200308142732-58ac5e232fba
 	github.com/swaggo/swag v1.6.9
-	go.mongodb.org/mongo-driver v1.4.1
 	golang.org/x/crypto v0.0.0-20210711020723-a769d52b0f97
 	golang.org/x/tools v0.0.0-20201102021907-8860a70d10e6 // indirect
 	google.golang.org/protobuf v1.25.0 // indirect
